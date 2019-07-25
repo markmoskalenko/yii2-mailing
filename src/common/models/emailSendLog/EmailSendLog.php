@@ -2,7 +2,7 @@
 
 namespace markmoskalenko\mailing\common\models\emailSendLog;
 
-use common\models\user\User;
+use markmoskalenko\mailing\common\interfaces\UserInterface;
 use markmoskalenko\mailing\common\models\ActiveRecord;
 use markmoskalenko\mailing\common\models\template\Template;
 use MongoDB\BSON\ObjectId;
@@ -25,6 +25,8 @@ use mongosoft\mongodb\MongoDateBehavior;
  * @property string      $templateKey
  * @property string      $logStep
  *
+ * @property UserInterface $user
+ * 
  * @mixin MongoDateBehavior
  */
 class EmailSendLog extends ActiveRecord
@@ -48,7 +50,6 @@ class EmailSendLog extends ActiveRecord
     const ATTR_OPEN_IP      = 'openIp';
     const ATTR_TEMPLATE_KEY = 'templateKey';
     const ATTR_LOG_STEP     = 'logStep';
-
 
     /**
      * @return EmailSendLogQuery
@@ -161,18 +162,18 @@ class EmailSendLog extends ActiveRecord
         $model->templateKey = $templateKey;
         $model->logStep = static::LOG_STEP_START;
 
-        $user = User::findByEmail($email);
+        //$user = $this->user->findByEmail($email);
         $template = Template::findByKey($templateKey);
 
         if (!$template) {
-            $model->error = "Шаблон {$templateKey} для пользователь с почтой {$email} не найден";
+            $model->error = "Шаблон {$templateKey} для пользователя с почтой {$email} не найден";
             $model->isSend = false;
             $model->save();
 
             return false;
         }
 
-        if (!$user) {
+        if (!$this->user->getId()) {
             $model->error = "Пользователь с почтой {$email} не найден";
             $model->isSend = false;
             $model->save();
@@ -182,7 +183,7 @@ class EmailSendLog extends ActiveRecord
 
         $model->error = "";
         $model->isSend = false;
-        $model->userId = $user->_id;
+        $model->userId = $this->user->getId();
         $model->theme = $template->name;
 
         if (!$model->save()) {

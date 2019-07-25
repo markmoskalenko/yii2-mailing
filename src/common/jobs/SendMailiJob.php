@@ -2,7 +2,7 @@
 
 namespace markmoskalenko\mailing\common\jobs;
 
-use markmoskalenko\mailing\common\models\user\User;
+use markmoskalenko\mailing\common\interfaces\UserInterface;
 use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\templateEmail\TemplateEmail;
@@ -40,6 +40,11 @@ class SendMailiJob extends BaseObject implements JobInterface
     public $logId;
 
     /**
+     * @var UserInterface
+     */
+    public $user;
+
+    /**
      * @param \yii\queue\Queue $queue
      * @return bool
      * @throws ErrorException
@@ -62,14 +67,14 @@ class SendMailiJob extends BaseObject implements JobInterface
             throw new ErrorException('Шаблон не найден ' . $this->key);
         }
 
-        $user = User::findOne(['email' => $this->email]);
+        //$user = $this->user->findOne(['email' => $this->email]);
 
-        if (!$user) {
+        if (!$this->user->getId()) {
             throw new ErrorException('Пользователь не найден ' . $this->email);
         }
 
-        $referral = $user->referralByAffiliateDomain;
-        $sourceDomain = $referral ? $referral->affiliateDomain : User::OUR_DOMAIN;
+        $referral = $this->user->getReferralByAffiliateDomain();
+        $sourceDomain = $referral ? $referral->affiliateDomain : $this->user->getOurDomain();
         $templateEmail = TemplateEmail::findByKeyAndLangAndAffiliateDomain($template->_id, 'ru', $sourceDomain);
 
         if (!$templateEmail) {
@@ -107,13 +112,13 @@ class SendMailiJob extends BaseObject implements JobInterface
 
             $sender = [$referral->affiliateSmtpSenderEmail => $referral->affiliateSmtpSenderName];
 
-            $webAppLink = str_replace(User::OUR_DOMAIN, $referral->affiliateDomain, $webAppLink);
-            $singInLink = str_replace(User::OUR_DOMAIN, $referral->affiliateDomain, $singInLink);
-            $paymentLink = str_replace(User::OUR_DOMAIN, $referral->affiliateDomain, $paymentLink);
-            $unsubscribeLink = str_replace(User::OUR_DOMAIN, $referral->affiliateDomain, $unsubscribeLink);
+            $webAppLink = str_replace($this->user->getOurDomain(), $referral->affiliateDomain, $webAppLink);
+            $singInLink = str_replace($this->user->getOurDomain(), $referral->affiliateDomain, $singInLink);
+            $paymentLink = str_replace($this->user->getOurDomain(), $referral->affiliateDomain, $paymentLink);
+            $unsubscribeLink = str_replace($this->user->getOurDomain(), $referral->affiliateDomain, $unsubscribeLink);
 
             foreach ((array)$this->data as $key => $value) {
-                $this->data[$key] = str_replace(User::OUR_DOMAIN, $referral->affiliateDomain, $value);
+                $this->data[$key] = str_replace($this->user->getOurDomain(), $referral->affiliateDomain, $value);
             }
 
         } else {
@@ -121,13 +126,13 @@ class SendMailiJob extends BaseObject implements JobInterface
         }
 
         $apiEndpoint = Yii::$app->params['host.api'];
-        $body = str_replace('{firstName}', $user->firstName, $templateEmail->body);
+        $body = str_replace('{firstName}', $this->user->getFirstName(), $templateEmail->body);
         $body = str_replace('{webAppLink}', $webAppLink, $body);
         $body = str_replace('{singInLink}', $singInLink, $body);
         $body = str_replace('{paymentLink}', $paymentLink, $body);
-        $body = str_replace('{email}', $user->email, $body);
-        $body = str_replace('{signUpAt}', $user->createdAt->toDateTime()->format('d.m.Y'), $body);
-        $body = str_replace('{expiredAt}', $user->expiredAt->toDateTime()->format('d.m.Y'), $body);
+        $body = str_replace('{email}', $this->user->getEmail(), $body);
+        $body = str_replace('{signUpAt}', $this->user->getCreatedAt()->toDateTime()->format('d.m.Y'), $body);
+        $body = str_replace('{expiredAt}', $this->user->getExpiredAt()->toDateTime()->format('d.m.Y'), $body);
 
         //@todo добавить токен отписки
         $body = str_replace('{unsubscribeLink}', $unsubscribeLink, $body);

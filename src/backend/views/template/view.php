@@ -1,6 +1,6 @@
 <?php
 
-use backend\grid\ActionColumn;
+use markmoskalenko\mailing\backend\grid\ActionColumn;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\templateEmail\TemplateEmail;
 use yii\bootstrap4\Html;

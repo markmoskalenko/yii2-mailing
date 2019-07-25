@@ -8,7 +8,7 @@
         {
             "name": "Mark Moskalenko",
             "email": "mark@mybase.pro",
-            "homepage": "https://github.com/markmoskalenko/yii2-mailing",
+            "homepage": "https://github.com/markmoskalenko/yii2-mailing"
         }
     ],
     "minimum-stability": "stable",
@@ -19,5 +19,5 @@
         "psr-4": {
             "markmoskalenko\\mailing\\": "src"
         }
-    },
+    }
 }

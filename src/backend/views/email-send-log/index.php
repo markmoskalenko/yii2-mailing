@@ -1,6 +1,6 @@
 <?php
 
-use backend\grid\ActionColumn;
+use markmoskalenko\mailing\backend\grid\ActionColumn;
 use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
 use markmoskalenko\mailing\common\models\template\TemplateSearch;
 use yii\bootstrap4\Html;
