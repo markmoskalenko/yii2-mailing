@@ -1,0 +1,23 @@
+{
+    "name": "markmoskalenko/yii2-mailing",
+    "description": "Yii2 Mailing extension",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mark Moskalenko",
+            "email": "mark@mybase.pro",
+            "homepage": "https://github.com/markmoskalenko/yii2-mailing",
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "yiisoft/yii2": "~2.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "markmoskalenko\\mailing\\": "src"
+        }
+    },
+}
