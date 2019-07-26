@@ -162,7 +162,6 @@ class EmailSendLog extends ActiveRecord
         $model->templateKey = $templateKey;
         $model->logStep = static::LOG_STEP_START;
 
-        //$user = $this->user->findByEmail($email);
         $template = Template::findByKey($templateKey);
 
         if (!$template) {

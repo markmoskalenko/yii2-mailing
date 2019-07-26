@@ -9,11 +9,6 @@ use yii\db\ActiveQueryInterface;
 interface UserInterface
 {
     /**
-     * @return string
-     */
-    public function getOurDomain();
-
-    /**
      * @return ObjectId
      */
     public function getId();

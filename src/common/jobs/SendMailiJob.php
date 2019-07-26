@@ -10,6 +10,7 @@ use MongoDB\BSON\ObjectId;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\ErrorException;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\queue\JobInterface;
 use yii\swiftmailer\Mailer;
@@ -45,6 +46,33 @@ class SendMailiJob extends BaseObject implements JobInterface
     public $user;
 
     /**
+     * Email отправителя
+     *
+     * @var string
+     */
+    public $senderEmail;
+
+    /**
+     * Имя отправителя
+     *
+     * @var string
+     */
+    public $senderName;
+
+    /**
+     * Массив ссылок
+     *
+     * @var array
+     */
+    public $links;
+
+    /**
+     * 
+     * @var string
+     */
+    public $ourDomain;
+
+    /**
      * @param \yii\queue\Queue $queue
      * @return bool
      * @throws ErrorException
@@ -60,31 +88,29 @@ class SendMailiJob extends BaseObject implements JobInterface
             throw new ErrorException('Лог не найден');
         }
 
-        $sender = ['hello@mybase.pro' => 'MyBase'];
+        $sender = [$this->senderEmail => $this->senderName];
 
         //        try {
         if (!$template) {
             throw new ErrorException('Шаблон не найден ' . $this->key);
         }
 
-        //$user = $this->user->findOne(['email' => $this->email]);
-
         if (!$this->user->getId()) {
             throw new ErrorException('Пользователь не найден ' . $this->email);
         }
 
         $referral = $this->user->getReferralByAffiliateDomain();
-        $sourceDomain = $referral ? $referral->affiliateDomain : $this->user->getOurDomain();
+        $sourceDomain = $referral ? $referral->affiliateDomain : $this->ourDomain;
         $templateEmail = TemplateEmail::findByKeyAndLangAndAffiliateDomain($template->_id, 'ru', $sourceDomain);
 
         if (!$templateEmail) {
             throw new ErrorException('Шаблон не найден ' . $this->key . ':' . $sourceDomain);
         }
 
-        $webAppLink = Yii::$app->params['host.frontend'];
-        $singInLink = Yii::$app->params['host.frontend.auth.signin'];
-        $paymentLink = Yii::$app->params['host.frontend.payment'];
-        $unsubscribeLink = Yii::$app->params['host.frontend.unsubscribe'];
+        $webAppLink = ArrayHelper::getValue($this->links, 'frontend');
+        $singInLink = ArrayHelper::getValue($this->links, 'signin');
+        $paymentLink = ArrayHelper::getValue($this->links, 'payment');
+        $unsubscribeLink = ArrayHelper::getValue($this->links, 'unsubscribe');
 
 
         if ($referral
@@ -112,20 +138,20 @@ class SendMailiJob extends BaseObject implements JobInterface
 
             $sender = [$referral->affiliateSmtpSenderEmail => $referral->affiliateSmtpSenderName];
 
-            $webAppLink = str_replace($this->user->getOurDomain(), $referral->affiliateDomain, $webAppLink);
-            $singInLink = str_replace($this->user->getOurDomain(), $referral->affiliateDomain, $singInLink);
-            $paymentLink = str_replace($this->user->getOurDomain(), $referral->affiliateDomain, $paymentLink);
-            $unsubscribeLink = str_replace($this->user->getOurDomain(), $referral->affiliateDomain, $unsubscribeLink);
+            $webAppLink = str_replace($this->ourDomain, $referral->affiliateDomain, $webAppLink);
+            $singInLink = str_replace($this->ourDomain, $referral->affiliateDomain, $singInLink);
+            $paymentLink = str_replace($this->ourDomain, $referral->affiliateDomain, $paymentLink);
+            $unsubscribeLink = str_replace($this->ourDomain, $referral->affiliateDomain, $unsubscribeLink);
 
             foreach ((array)$this->data as $key => $value) {
-                $this->data[$key] = str_replace($this->user->getOurDomain(), $referral->affiliateDomain, $value);
+                $this->data[$key] = str_replace($this->ourDomain, $referral->affiliateDomain, $value);
             }
 
         } else {
             $mailer = Yii::$app->mailer;
         }
 
-        $apiEndpoint = Yii::$app->params['host.api'];
+        $apiEndpoint = ArrayHelper::getValue($this->links, 'api');
         $body = str_replace('{firstName}', $this->user->getFirstName(), $templateEmail->body);
         $body = str_replace('{webAppLink}', $webAppLink, $body);
         $body = str_replace('{singInLink}', $singInLink, $body);
