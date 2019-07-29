@@ -5,8 +5,18 @@ Yii2 Mailing extension
 Установка
 ------------------
 * Установка пакета с помощью Composer.
+В composer.json проекта добавить:
 ```
-composer require markmoskalenko/yii2-mailing
+"repositories": [
+    {
+        "type": "git",
+        "url": "https://github.com/markmoskalenko/yii2-mailing/"
+    }
+]
+```
+Затем подключить:
+```
+composer require markmoskalenko/yii2-mailing:dev-master --prefer-source
 ```
 
 Использование
