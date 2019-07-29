@@ -155,7 +155,7 @@ class EmailSendLog extends ActiveRecord
      * @param $templateKey
      * @return bool
      */
-    public static function start($email, $templateKey)
+    public static function start($email, $templateKey, $user)
     {
         $model = new self();
         $model->email = $email;
@@ -172,7 +172,7 @@ class EmailSendLog extends ActiveRecord
             return false;
         }
 
-        if (!$this->user->getId()) {
+        if (!$user) {
             $model->error = "Пользователь с почтой {$email} не найден";
             $model->isSend = false;
             $model->save();
@@ -182,7 +182,7 @@ class EmailSendLog extends ActiveRecord
 
         $model->error = "";
         $model->isSend = false;
-        $model->userId = $this->user->getId();
+        $model->userId = $user->_id;
         $model->theme = $template->name;
 
         if (!$model->save()) {

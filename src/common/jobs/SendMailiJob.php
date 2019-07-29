@@ -66,8 +66,7 @@ class SendMailiJob extends BaseObject implements JobInterface
      */
     public $links;
 
-    /**
-     * 
+    /** 
      * @var string
      */
     public $ourDomain;
@@ -95,11 +94,12 @@ class SendMailiJob extends BaseObject implements JobInterface
             throw new ErrorException('Шаблон не найден ' . $this->key);
         }
 
-        if (!$this->user->getId()) {
+        if (!$this->user) {
             throw new ErrorException('Пользователь не найден ' . $this->email);
         }
 
-        $referral = $this->user->getReferralByAffiliateDomain();
+        $referral = $this->user->referralByAffiliateDomain;
+
         $sourceDomain = $referral ? $referral->affiliateDomain : $this->ourDomain;
         $templateEmail = TemplateEmail::findByKeyAndLangAndAffiliateDomain($template->_id, 'ru', $sourceDomain);
 
@@ -152,13 +152,13 @@ class SendMailiJob extends BaseObject implements JobInterface
         }
 
         $apiEndpoint = ArrayHelper::getValue($this->links, 'api');
-        $body = str_replace('{firstName}', $this->user->getFirstName(), $templateEmail->body);
+        $body = str_replace('{firstName}', $this->user->firstName, $templateEmail->body);
         $body = str_replace('{webAppLink}', $webAppLink, $body);
         $body = str_replace('{singInLink}', $singInLink, $body);
         $body = str_replace('{paymentLink}', $paymentLink, $body);
-        $body = str_replace('{email}', $this->user->getEmail(), $body);
-        $body = str_replace('{signUpAt}', $this->user->getCreatedAt()->toDateTime()->format('d.m.Y'), $body);
-        $body = str_replace('{expiredAt}', $this->user->getExpiredAt()->toDateTime()->format('d.m.Y'), $body);
+        $body = str_replace('{email}', $this->user->email, $body);
+        $body = str_replace('{signUpAt}', $this->user->createdAt->toDateTime()->format('d.m.Y'), $body);
+        $body = str_replace('{expiredAt}', $this->user->expiredAt->toDateTime()->format('d.m.Y'), $body);
 
         //@todo добавить токен отписки
         $body = str_replace('{unsubscribeLink}', $unsubscribeLink, $body);

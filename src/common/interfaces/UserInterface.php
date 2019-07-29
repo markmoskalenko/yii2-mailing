@@ -39,10 +39,16 @@ interface UserInterface
     public function getExpiredAt();
 
     /**
-     * @param string $code
+     * @param array $params
      * @return UserInterface
      */
     public static function findOne(array $params);
+
+    /**
+     * @param string $email
+     * @return UserInterface
+     */
+    public static function findByEmail(string $email);
 
     /**
      * @param string $code

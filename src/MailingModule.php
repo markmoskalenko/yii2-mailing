@@ -73,7 +73,8 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
      */
     public function send($email, $key, $data = [])
     {
-        $logId = EmailSendLog::start($email, $key);
+        $user = $this->userClass::findByEmail($email);
+        $logId = EmailSendLog::start($email, $key, $user);
 
         if ($logId !== false) {
             /** @var yii\queue\redis\Queue $queue */
@@ -83,7 +84,7 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
                 'email' => $email,
                 'data'  => $data,
                 'logId' => $logId,
-                'user' => $this->userClass,
+                'user' => $user,
                 'senderEmail' => $this->senderEmail,
                 'senderName' => $this->senderName,
                 'ourDomain' => $this->ourDomain,
