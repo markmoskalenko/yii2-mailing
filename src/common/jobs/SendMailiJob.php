@@ -172,7 +172,9 @@ class SendMailiJob extends BaseObject implements JobInterface
         $body = str_replace('{unsubscribeLink}', $unsubscribeLink, $body);
         $body = str_replace('{currentYear}', date('Y'), $body);
         $body = str_replace('src="/images', 'src="' . $apiEndpoint . '/images', $body);
+        $body = str_replace('src=\'/images', 'src=\'' . $apiEndpoint . '/images', $body);
         $body = str_replace('url("/images', 'url("' . $apiEndpoint . '/images', $body);
+        $body = str_replace('url(\'/images', 'url(\'' . $apiEndpoint . '/images', $body);
 
         $body .= Html::img("{$apiEndpoint}/mailing/pixel/open/{$this->logId}.png", [
             'style' => 'positions: absolute; left: -99999px;bottom:-99999px; width:0px; height: 0px;'
