@@ -71,6 +71,14 @@ class SendMailiJob extends BaseObject implements JobInterface
      */
     public $ourDomain;
 
+
+    /**
+     * Шаблон письма
+     * 
+     * @var string
+     */
+    public $layout = 'html';
+
     /**
      * @param \yii\queue\Queue $queue
      * @return bool
@@ -121,8 +129,8 @@ class SendMailiJob extends BaseObject implements JobInterface
             && $referral->affiliateSmtpUsername
             && $referral->affiliateSmtpPassword
             && $referral->affiliateSmtpPort) {
-            /** @var Mailer $mailer */
 
+            /** @var Mailer $mailer */
             $mailer = Yii::createObject([
                 'class'     => Mailer::class,
                 'viewPath'  => '@common/mail',
@@ -164,6 +172,7 @@ class SendMailiJob extends BaseObject implements JobInterface
         $body = str_replace('{unsubscribeLink}', $unsubscribeLink, $body);
         $body = str_replace('{currentYear}', date('Y'), $body);
         $body = str_replace('src="/images', 'src="' . $apiEndpoint . '/images', $body);
+        $body = str_replace('url("/images', 'url("' . $apiEndpoint . '/images', $body);
 
         $body .= Html::img("{$apiEndpoint}/mailing/pixel/open/{$this->logId}.png", [
             'style' => 'positions: absolute; left: -99999px;bottom:-99999px; width:0px; height: 0px;'
@@ -173,9 +182,8 @@ class SendMailiJob extends BaseObject implements JobInterface
             $body = str_replace($key, $value, $body);
         }
 
-
         $isSend = $mailer
-            ->compose('layouts/html', ['content' => $body])
+            ->compose('layouts/'.$this->layout, ['content' => $body])
             ->setSubject($templateEmail->subject)
             ->setFrom($sender)
             ->setTo($this->email)
