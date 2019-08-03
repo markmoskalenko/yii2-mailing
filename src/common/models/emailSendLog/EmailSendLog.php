@@ -164,31 +164,31 @@ class EmailSendLog extends ActiveRecord
 
         $template = Template::findByKey($templateKey);
 
+        $model->error = "";
+        $model->isSend = false;
+
         if (!$template) {
             $model->error = "Шаблон {$templateKey} для пользователя с почтой {$email} не найден";
-            $model->isSend = false;
+            $model->theme = $templateKey;
             $model->save();
 
             return false;
         }
+
+        $model->theme = $template->name;
 
         if (!$user) {
             $model->error = "Пользователь с почтой {$email} не найден";
-            $model->isSend = false;
             $model->save();
 
             return false;
         }
-
-        $model->error = "";
-        $model->isSend = false;
+        
         $model->userId = $user->_id;
-        $model->theme = $template->name;
 
         if (!$model->save()) {
             return false;
         }
-
 
         return (string)$model->_id;
     }
