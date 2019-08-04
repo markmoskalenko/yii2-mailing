@@ -42,10 +42,15 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
     public $userClass;
 
     /**
-     * 
+     *
      * @var string
      */
     public $ourDomain;
+
+    /**
+     * @var boolean
+     */
+    public $ssl = true;
 
     /**
      * @inheritdoc
@@ -80,15 +85,16 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
             /** @var yii\queue\redis\Queue $queue */
             $queue = Yii::$app->get('queue');
             $queue->push(new SendMailiJob([
-                'key'   => $key,
-                'email' => $email,
-                'data'  => $data,
-                'logId' => $logId,
-                'user' => $user,
+                'key'         => $key,
+                'email'       => $email,
+                'data'        => $data,
+                'logId'       => $logId,
+                'user'        => $user,
                 'senderEmail' => $this->senderEmail,
-                'senderName' => $this->senderName,
-                'ourDomain' => $this->ourDomain,
-                'links' => $this->_links,
+                'senderName'  => $this->senderName,
+                'ourDomain'   => $this->ourDomain,
+                'links'       => $this->_links,
+                'ssl'         => $this->ssl,
             ]));
         } else {
             //@todo сообщение в телеграм
@@ -114,5 +120,4 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
     {
         return $this->_links;
     }
-
 }

@@ -66,15 +66,20 @@ class SendMailiJob extends BaseObject implements JobInterface
      */
     public $links;
 
-    /** 
+    /**
      * @var string
      */
     public $ourDomain;
 
+    /**
+     * @var boolean
+     */
+    public $ssl;
+
 
     /**
      * Шаблон письма
-     * 
+     *
      * @var string
      */
     public $layout = 'html';
@@ -107,20 +112,21 @@ class SendMailiJob extends BaseObject implements JobInterface
             throw new ErrorException('Пользователь не найден ' . $this->email);
         }
 
-        $referral = $this->user->getReferralByAffiliateDomain();
+        $referral = $this->user->getReferralByAffiliateDomain()->one();
 
         $sourceDomain = $referral ? $referral->affiliateDomain : $this->ourDomain;
+        $redirectDomain = ($this->ssl ? 'https://' : 'http://') . 'app.' . $sourceDomain;
+
         $templateEmail = TemplateEmail::findByKeyAndLangAndAffiliateDomain($template->_id, 'ru', $sourceDomain);
 
         if (!$templateEmail) {
             throw new ErrorException('Шаблон не найден ' . $this->key . ':' . $sourceDomain);
         }
 
-        $webAppLink = ArrayHelper::getValue($this->links, 'frontend');
-        $singInLink = ArrayHelper::getValue($this->links, 'signin');
+        $webAppLink = ArrayHelper::getValue($this->links, 'webApp');
+        $singInLink = ArrayHelper::getValue($this->links, 'signIn');
         $paymentLink = ArrayHelper::getValue($this->links, 'payment');
         $unsubscribeLink = ArrayHelper::getValue($this->links, 'unsubscribe');
-
 
         if ($referral
             && $referral->affiliateSmtpSenderEmail
@@ -146,18 +152,17 @@ class SendMailiJob extends BaseObject implements JobInterface
             ]);
 
             $sender = [$referral->affiliateSmtpSenderEmail => $referral->affiliateSmtpSenderName];
-
-            $webAppLink = str_replace('{host}', $referral->affiliateDomain, $webAppLink);
-            $singInLink = str_replace('{host}', $referral->affiliateDomain, $singInLink);
-            $paymentLink = str_replace('{host}', $referral->affiliateDomain, $paymentLink);
-            $unsubscribeLink = str_replace('{host}', $referral->affiliateDomain, $unsubscribeLink);
-
-            foreach ((array)$this->data as $key => $value) {
-                $this->data[$key] = str_replace('{host}', $referral->affiliateDomain, $value);
-            }
-
         } else {
             $mailer = Yii::$app->mailer;
+        }
+
+        $webAppLink = str_replace('{host}', $redirectDomain, $webAppLink);
+        $singInLink = str_replace('{host}', $redirectDomain, $singInLink);
+        $paymentLink = str_replace('{host}', $redirectDomain, $paymentLink);
+        $unsubscribeLink = str_replace('{host}', $redirectDomain, $unsubscribeLink);
+
+        foreach ((array)$this->data as $key => $value) {
+            $this->data[$key] = str_replace('{host}', $redirectDomain, $value);
         }
 
         $apiEndpoint = ArrayHelper::getValue($this->links, 'api');
@@ -187,7 +192,7 @@ class SendMailiJob extends BaseObject implements JobInterface
         }
 
         $isSend = $mailer
-            ->compose('layouts/'.$this->layout, ['content' => $body])
+            ->compose('layouts/' . $this->layout, ['content' => $body])
             ->setSubject($templateEmail->subject)
             ->setFrom($sender)
             ->setTo($this->email)
