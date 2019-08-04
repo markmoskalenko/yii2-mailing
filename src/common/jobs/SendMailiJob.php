@@ -115,8 +115,6 @@ class SendMailiJob extends BaseObject implements JobInterface
         $referral = $this->user->getReferralByAffiliateDomain()->one();
 
         $sourceDomain = $referral ? $referral->affiliateDomain : $this->ourDomain;
-        $redirectDomain = ($this->ssl ? 'https://' : 'http://') . 'app.' . $sourceDomain;
-
         $templateEmail = TemplateEmail::findByKeyAndLangAndAffiliateDomain($template->_id, 'ru', $sourceDomain);
 
         if (!$templateEmail) {
@@ -127,6 +125,9 @@ class SendMailiJob extends BaseObject implements JobInterface
         $singInLink = ArrayHelper::getValue($this->links, 'signIn');
         $paymentLink = ArrayHelper::getValue($this->links, 'payment');
         $unsubscribeLink = ArrayHelper::getValue($this->links, 'unsubscribe');
+
+        $redirectDomain = ($this->ssl ? 'https://' : 'http://') . $webAppLink;
+
 
         if ($referral
             && $referral->affiliateSmtpSenderEmail
