@@ -83,6 +83,7 @@ class SendMailiJob extends BaseObject implements JobInterface
      * @param \yii\queue\Queue $queue
      * @return bool
      * @throws ErrorException
+     * @throws \yii\base\InvalidConfigException
      */
     public function execute($queue)
     {
@@ -106,7 +107,7 @@ class SendMailiJob extends BaseObject implements JobInterface
             throw new ErrorException('Пользователь не найден ' . $this->email);
         }
 
-        $referral = $this->user->referralByAffiliateDomain;
+        $referral = $this->user->getReferralByAffiliateDomain();
 
         $sourceDomain = $referral ? $referral->affiliateDomain : $this->ourDomain;
         $templateEmail = TemplateEmail::findByKeyAndLangAndAffiliateDomain($template->_id, 'ru', $sourceDomain);
@@ -146,13 +147,13 @@ class SendMailiJob extends BaseObject implements JobInterface
 
             $sender = [$referral->affiliateSmtpSenderEmail => $referral->affiliateSmtpSenderName];
 
-            $webAppLink = str_replace($this->ourDomain, $referral->affiliateDomain, $webAppLink);
-            $singInLink = str_replace($this->ourDomain, $referral->affiliateDomain, $singInLink);
-            $paymentLink = str_replace($this->ourDomain, $referral->affiliateDomain, $paymentLink);
-            $unsubscribeLink = str_replace($this->ourDomain, $referral->affiliateDomain, $unsubscribeLink);
+            $webAppLink = str_replace('{host}', $referral->affiliateDomain, $webAppLink);
+            $singInLink = str_replace('{host}', $referral->affiliateDomain, $singInLink);
+            $paymentLink = str_replace('{host}', $referral->affiliateDomain, $paymentLink);
+            $unsubscribeLink = str_replace('{host}', $referral->affiliateDomain, $unsubscribeLink);
 
             foreach ((array)$this->data as $key => $value) {
-                $this->data[$key] = str_replace($this->ourDomain, $referral->affiliateDomain, $value);
+                $this->data[$key] = str_replace('{host}', $referral->affiliateDomain, $value);
             }
 
         } else {
@@ -160,13 +161,13 @@ class SendMailiJob extends BaseObject implements JobInterface
         }
 
         $apiEndpoint = ArrayHelper::getValue($this->links, 'api');
-        $body = str_replace('{firstName}', $this->user->firstName, $templateEmail->body);
+        $body = str_replace('{firstName}', $this->user->getFirstName(), $templateEmail->body);
         $body = str_replace('{webAppLink}', $webAppLink, $body);
         $body = str_replace('{singInLink}', $singInLink, $body);
         $body = str_replace('{paymentLink}', $paymentLink, $body);
-        $body = str_replace('{email}', $this->user->email, $body);
-        $body = str_replace('{signUpAt}', $this->user->createdAt->toDateTime()->format('d.m.Y'), $body);
-        $body = str_replace('{expiredAt}', $this->user->expiredAt->toDateTime()->format('d.m.Y'), $body);
+        $body = str_replace('{email}', $this->user->getEmail(), $body);
+        $body = str_replace('{signUpAt}', $this->user->getCreatedAt()->toDateTime()->format('d.m.Y'), $body);
+        $body = str_replace('{expiredAt}', $this->user->getExpiredAt()->toDateTime()->format('d.m.Y'), $body);
 
         //@todo добавить токен отписки
         $body = str_replace('{unsubscribeLink}', $unsubscribeLink, $body);
