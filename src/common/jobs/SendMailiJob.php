@@ -126,8 +126,8 @@ class SendMailiJob extends BaseObject implements JobInterface
         $paymentLink = ArrayHelper::getValue($this->links, 'payment');
         $unsubscribeLink = ArrayHelper::getValue($this->links, 'unsubscribe');
 
+        $webAppLink = str_replace('{host}', $sourceDomain, $webAppLink);
         $redirectDomain = ($this->ssl ? 'https://' : 'http://') . $webAppLink;
-
 
         if ($referral
             && $referral->affiliateSmtpSenderEmail
