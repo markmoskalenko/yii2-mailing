@@ -95,6 +95,7 @@ class SendMailiJob extends BaseObject implements JobInterface
         $template = Template::findByKey($this->key);
 
         $log = EmailSendLog::findOne($this->logId);
+        $sender = [$this->senderEmail => $this->senderName];
 
         try {
             if (!$log) {
@@ -102,7 +103,6 @@ class SendMailiJob extends BaseObject implements JobInterface
                 throw new ErrorException('Лог не найден');
             }
 
-            $sender = [$this->senderEmail => $this->senderName];
 
             if (!$template) {
                 throw new ErrorException('Шаблон не найден ' . $this->key);
@@ -133,10 +133,10 @@ class SendMailiJob extends BaseObject implements JobInterface
             $paymentLink = ArrayHelper::getValue($this->links, 'payment');
             $unsubscribeLink = ArrayHelper::getValue($this->links, 'unsubscribe');
 
-            $shceme = $this->ssl ? 'https://' : 'http://';
+            $scheme = $this->ssl ? 'https://' : 'http://';
 
             // Корневая ссылка на app.
-            $webAppLink = $shceme . str_replace('{host}', $sourceDomain, $webAppLink);
+            $webAppLink = $scheme . str_replace('{host}', $sourceDomain, $webAppLink);
 
             if ($referral
                 && $referral->affiliateSmtpSenderEmail
