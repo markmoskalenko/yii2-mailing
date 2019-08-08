@@ -237,7 +237,7 @@ class SendMailiJob extends BaseObject implements JobInterface
             } else {
                 $log->setError('Ошибка отправки');
             }
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $message = '[Отправитель]: ' . print_r($sender, true);
             $message .= '<br>' . $e->getMessage();
 
