@@ -44,7 +44,20 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class'      => ActionColumn::class,
                 'controller' => 'template-email',
-                'template'   => '{update}'
+                'buttons'    => [
+                    'copy' => function ($url, $model) {
+                        $url = ['/mailing/template-email/copy', 'id' => (string)$model->_id];
+                        $title = 'Дублировать письмо';
+                        $icon = Html::tag('span', '', ['class' => 'far fa-copy']);
+                        $options = array_merge([
+                            'title'      => $title,
+                            'aria-label' => $title,
+                            'data-pjax'  => '0',
+                        ]);
+                        return Html::a($icon, $url, $options);
+                    },
+                ],
+                'template'   => '{update} {copy} {delete}'
             ],
         ],
     ]); ?>
