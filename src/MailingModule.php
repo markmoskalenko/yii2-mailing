@@ -74,9 +74,10 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
      * @param string $email
      * @param string $key
      * @param array  $data
-     * @throws \yii\base\InvalidConfigException
+     * @param int    $delay
+     * @throws InvalidConfigException
      */
-    public function send($email, $key, $data = [])
+    public function send($email, $key, $data = [], $delay = 0)
     {
         $user = $this->userClass::findByEmail($email);
         $logId = EmailSendLog::start($email, $key, $user);
@@ -84,7 +85,7 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
         if ($logId !== false) {
             /** @var yii\queue\redis\Queue $queue */
             $queue = Yii::$app->get('queue');
-            $queue->push(new SendMailiJob([
+            $queue->delay($delay)->push(new SendMailiJob([
                 'key'         => $key,
                 'email'       => $email,
                 'data'        => $data,
@@ -94,6 +95,7 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
                 'ourDomain'   => $this->ourDomain,
                 'links'       => $this->_links,
                 'ssl'         => $this->ssl,
+                'userClass'   => $this->userClass
             ]));
         } else {
             //@todo сообщение в телеграм
