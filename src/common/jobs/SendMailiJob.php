@@ -76,6 +76,11 @@ class SendMailiJob extends BaseObject implements JobInterface
      */
     public $ssl;
 
+    /**
+     * @var UserInterface
+     */
+    public $userClass;
+
 
     /**
      * Шаблон письма
@@ -92,6 +97,8 @@ class SendMailiJob extends BaseObject implements JobInterface
      */
     public function execute($queue)
     {
+        $this->user = $this->userClass::findByEmail($this->email);
+
         $template = Template::findByKey($this->key);
 
         $log = EmailSendLog::findOne($this->logId);
@@ -111,6 +118,7 @@ class SendMailiJob extends BaseObject implements JobInterface
             if (!$this->user) {
                 throw new ErrorException('Пользователь не найден ' . $this->email);
             }
+
 
             // Поиск основного партнера по реферальному домену
             // @todo переименовать в affiliate

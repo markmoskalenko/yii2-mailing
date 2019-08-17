@@ -89,7 +89,6 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
                 'email'       => $email,
                 'data'        => $data,
                 'logId'       => $logId,
-                'user'        => $user,
                 'senderEmail' => $this->senderEmail,
                 'senderName'  => $this->senderName,
                 'ourDomain'   => $this->ourDomain,
