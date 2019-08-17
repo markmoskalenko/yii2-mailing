@@ -204,14 +204,15 @@ class SendMailiJob extends BaseObject implements JobInterface
             // Почта
             $body = str_replace('{email}', $this->user->getEmail(), $body);
 
+            //@todo добавить токен отписки
+            $body = str_replace('{unsubscribeLink}', $unsubscribeLink, $body);
+
             // Дата регистрации
             $body = str_replace('{signUpAt}', $this->user->getCreatedAt()->toDateTime()->format('d.m.Y'), $body);
 
             // Дата оплаты
             $body = str_replace('{expiredAt}', $this->user->getExpiredAt()->toDateTime()->format('d.m.Y'), $body);
 
-            //@todo добавить токен отписки
-            $body = str_replace('{unsubscribeLink}', $unsubscribeLink, $body);
 
             // Текущая год
             $body = str_replace('{currentYear}', date('Y'), $body);

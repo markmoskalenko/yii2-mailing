@@ -40,7 +40,7 @@ class TemplateSearch extends Template
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            //            'sort'  => ['defaultOrder' => [Template::ATTR_USER_LIMIT => SORT_ASC]]
+            'sort'  => ['defaultOrder' => [Template::ATTR_NAME => SORT_ASC]]
         ]);
 
         $this->load($params);
