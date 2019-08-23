@@ -16,6 +16,7 @@ class EmailSendLogSearch extends EmailSendLog
     public function rules()
     {
         return [
+            ['email', 'safe']
         ];
     }
 
@@ -60,11 +61,13 @@ class EmailSendLogSearch extends EmailSendLog
             'query' => $query,
         ]);
 
-        $this->load($params);
+        $this->load($params, null);
 
         if (!$this->validate()) {
             return [];
         }
+
+        $query->andFilterWhere(['like', 'email', $this->email]);
 
         return $dataProvider;
     }
