@@ -59,6 +59,7 @@ class EmailSendLogSearch extends EmailSendLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'  => ['defaultOrder' => [static::ATTR_MONGO_ID => SORT_DESC]]
         ]);
 
         $this->load($params, null);
