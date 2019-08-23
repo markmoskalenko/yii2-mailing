@@ -55,7 +55,7 @@ class EmailSendLogSearch extends EmailSendLog
 
     public function searchAdmin($params)
     {
-        $query = EmailSendLog::find()->orderBy([EmailSendLog::ATTR_MONGO_ID => SORT_ASC]);
+        $query = EmailSendLog::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
