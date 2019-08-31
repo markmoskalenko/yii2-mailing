@@ -141,6 +141,8 @@ class SendMailiJob extends BaseObject implements JobInterface
             $paymentLink = ArrayHelper::getValue($this->links, 'payment');
             $unsubscribeLink = ArrayHelper::getValue($this->links, 'unsubscribe');
 
+            $unsubscribeLink .= "?email={$this->user->getEmail()}";
+
             $scheme = $this->ssl ? 'https://' : 'http://';
 
             // Корневая ссылка на app.
