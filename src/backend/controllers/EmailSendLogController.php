@@ -16,11 +16,11 @@ class EmailSendLogController extends Controller
      */
     public function actionIndex()
     {
-        $sarchModel = new EmailSendLogSearch();
-        $dataProvider = $sarchModel->search(Yii::$app->request->get());
+        $searchModel = new EmailSendLogSearch();
+        $dataProvider = $searchModel->searchAdmin(Yii::$app->request->get());
 
         return $this->render('index', [
-            '$sarchModel'  => $sarchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider
         ]);
     }

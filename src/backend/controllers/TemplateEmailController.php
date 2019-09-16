@@ -47,6 +47,20 @@ class TemplateEmailController extends Controller
         ]);
     }
 
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     */
+    public function actionCopy($id)
+    {
+        $model = $this->findModel($id);
+        $newModel = new TemplateEmail();
+        $newModel->setAttributes($model->getAttributes());
+        $newModel->save();
+
+        return $this->redirect(['/mailing/template/view', 'id' => (string)$model->templateId]);
+    }
 
     /**
      * @param $id

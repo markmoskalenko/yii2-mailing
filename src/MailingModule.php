@@ -42,10 +42,15 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
     public $userClass;
 
     /**
-     * 
+     *
      * @var string
      */
     public $ourDomain;
+
+    /**
+     * @var boolean
+     */
+    public $ssl = true;
 
     /**
      * @inheritdoc
@@ -69,9 +74,10 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
      * @param string $email
      * @param string $key
      * @param array  $data
-     * @throws \yii\base\InvalidConfigException
+     * @param int    $delay
+     * @throws InvalidConfigException
      */
-    public function send($email, $key, $data = [])
+    public function send($email, $key, $data = [], $delay = 0)
     {
         $user = $this->userClass::findByEmail($email);
         $logId = EmailSendLog::start($email, $key, $user);
@@ -79,16 +85,17 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
         if ($logId !== false) {
             /** @var yii\queue\redis\Queue $queue */
             $queue = Yii::$app->get('queue');
-            $queue->push(new SendMailiJob([
-                'key'   => $key,
-                'email' => $email,
-                'data'  => $data,
-                'logId' => $logId,
-                'user' => $user,
+            $queue->delay($delay)->push(new SendMailiJob([
+                'key'         => $key,
+                'email'       => $email,
+                'data'        => $data,
+                'logId'       => $logId,
                 'senderEmail' => $this->senderEmail,
-                'senderName' => $this->senderName,
-                'ourDomain' => $this->ourDomain,
-                'links' => $this->_links,
+                'senderName'  => $this->senderName,
+                'ourDomain'   => $this->ourDomain,
+                'links'       => $this->_links,
+                'ssl'         => $this->ssl,
+                'userClass'   => $this->userClass
             ]));
         } else {
             //@todo сообщение в телеграм
@@ -114,5 +121,4 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
     {
         return $this->_links;
     }
-
 }

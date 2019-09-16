@@ -13,44 +13,69 @@ use yii\grid\GridView;
 $this->title = 'Лог отправки писем';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="tariff-group-index">
-    <h1><?= Html::encode($this->title) ?></h1>
+<div class="page-header row no-gutters py-4">
+    <div class="col-12 text-center text-sm-left mb-0">
+        <span class="text-uppercase page-subtitle">Список писем которые мы отправляем пользователям</span>
+        <h3 class="page-title"><?= $this->title ?></h3>
+    </div>
+</div>
 
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'pager'        => [
-            'linkContainerOptions'          => ['class' => 'page-item'],
-            'linkOptions'                   => ['class' => 'page-link'],
-            'disabledListItemSubTagOptions' => ['tag' => 'a', 'class' => 'page-link']
-        ],
-        'columns'      => [
-            [
-                'attribute' => EmailSendLog::ATTR_CREATED_AT,
-                'format'    => 'raw',
-                'value'     => function (EmailSendLog $item)
-                {
-                    $html = '<strong>' . $item->theme . '</strong><br>';
-                    $html .= 'Создано: ' . $item->createdAtFormatAdmin() . '<br>';
-                    $html .= 'Отправлено: ' . $item->sendAtFormatAdmin() . '<br>';
-                    $html .= 'Прочитано: ' . $item->openAtFormatAdmin() . '<br>';
-                    $html .= 'IP: ' . $item->openIp;
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-3">
+            <div class="card-body">
+                <?= $this->render('_search', [
+                    'model' => $searchModel
+                ]) ?>
+            </div>
+        </div>
+    </div>
 
-                    return $html;
-                }
-            ],
-            [
-                'attribute' => EmailSendLog::ATTR_EMAIL,
-            ],
-            [
-                'format'    => 'raw',
-                'attribute' => EmailSendLog::ATTR_ERROR,
-            ],
-            [
-                'class'    => ActionColumn::class,
-                'template' => '{view} {update} {delete}'
-            ],
-        ],
-    ]); ?>
+    <div class="col-12">
+        <div class="card mb-5">
+            <div class="card-header border-bottom">
+                <h6 class="m-0">Список</h6>
+            </div>
+            <div class="card-body p-0 pb-3">
+                <?= GridView::widget([
+                    'layout' => "{items}\n{pager}",
+                    'dataProvider' => $dataProvider,
+                    'pager'        => [
+                        'linkContainerOptions'          => ['class' => 'page-item'],
+                        'linkOptions'                   => ['class' => 'page-link'],
+                        'disabledListItemSubTagOptions' => ['tag' => 'a', 'class' => 'page-link']
+                    ],
+                    'columns'      => [
+                        [
+                            'attribute' => EmailSendLog::ATTR_CREATED_AT,
+                            'format'    => 'raw',
+                            'value'     => function (EmailSendLog $item)
+                            {
+                                $html = '<strong>' . $item->theme . '</strong><br>';
+                                $html .= 'Создано: ' . $item->createdAtFormatAdmin() . '<br>';
+                                $html .= 'Отправлено: ' . $item->sendAtFormatAdmin() . '<br>';
+                                $html .= 'Прочитано: ' . $item->openAtFormatAdmin() . '<br>';
+                                $html .= 'IP: ' . $item->openIp;
+
+                                return $html;
+                            }
+                        ],
+                        [
+                            'attribute' => EmailSendLog::ATTR_EMAIL,
+                        ],
+                        [
+                            'format'    => 'raw',
+                            'attribute' => EmailSendLog::ATTR_ERROR,
+                        ],
+                        [
+                            'class'    => ActionColumn::class,
+                            'template' => '{view} {update} {delete}'
+                        ],
+                    ],
+                ]); ?>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>

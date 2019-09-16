@@ -16,6 +16,7 @@ class EmailSendLogSearch extends EmailSendLog
     public function rules()
     {
         return [
+            ['email', 'safe']
         ];
     }
 
@@ -54,17 +55,20 @@ class EmailSendLogSearch extends EmailSendLog
 
     public function searchAdmin($params)
     {
-        $query = EmailSendLog::find()->orderBy([EmailSendLog::ATTR_MONGO_ID => SORT_ASC]);
+        $query = EmailSendLog::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'  => ['defaultOrder' => [static::ATTR_MONGO_ID => SORT_DESC]]
         ]);
 
-        $this->load($params);
+        $this->load($params, null);
 
         if (!$this->validate()) {
             return [];
         }
+
+        $query->andFilterWhere(['like', 'email', $this->email]);
 
         return $dataProvider;
     }

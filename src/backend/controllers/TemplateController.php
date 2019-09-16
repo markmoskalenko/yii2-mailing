@@ -7,6 +7,7 @@ use markmoskalenko\mailing\common\models\template\TemplateSearch;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
  * Тарифные планы
@@ -15,21 +16,20 @@ class TemplateController extends Controller
 {
 
     /**
-     * @return string|\yii\web\Response
+     * @return string|Response
      */
     public function actionIndex()
     {
-        $sarchModel = new TemplateSearch();
-        $dataProvider = $sarchModel->search(Yii::$app->request->get());
+        $searchModel = new TemplateSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->get());
 
         return $this->render('index', [
-            '$sarchModel'  => $sarchModel,
             'dataProvider' => $dataProvider
         ]);
     }
 
     /**
-     * @return string|\yii\web\Response
+     * @return string|Response
      */
     public function actionCreate()
     {
@@ -46,7 +46,7 @@ class TemplateController extends Controller
 
     /**
      * @param $id
-     * @return string|\yii\web\Response
+     * @return string|Response
      * @throws NotFoundHttpException
      */
     public function actionView($id)
@@ -66,7 +66,7 @@ class TemplateController extends Controller
 
     /**
      * @param $id
-     * @return string|\yii\web\Response
+     * @return string|Response
      * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
@@ -85,7 +85,7 @@ class TemplateController extends Controller
 
     /**
      * @param $id
-     * @return \yii\web\Response
+     * @return Response
      * @throws NotFoundHttpException
      * @throws \yii\db\StaleObjectException
      */
