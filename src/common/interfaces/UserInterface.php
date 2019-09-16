@@ -24,6 +24,11 @@ interface UserInterface
     public function getFirstName();
 
     /**
+     * @return string
+     */
+    public function getLanguage();
+
+    /**
      * @return mixed
      */
     public function getReferralByAffiliateDomain();

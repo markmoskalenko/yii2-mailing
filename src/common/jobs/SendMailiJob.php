@@ -130,7 +130,8 @@ class SendMailiJob extends BaseObject implements JobInterface
 
             // Шаблон письма для отправки
             // Ищет по ключу, языку и домены партнера
-            $templateEmail = TemplateEmail::findByKeyAndLangAndAffiliateDomain($template->_id, 'ru', $sourceDomain);
+            $templateEmail = TemplateEmail::findByKeyAndLangAndAffiliateDomain($template->_id, $this->user->getLanguage(),
+                $sourceDomain);
 
             if (!$templateEmail) {
                 throw new ErrorException('Шаблон не найден ' . $this->key . ':' . $sourceDomain);
