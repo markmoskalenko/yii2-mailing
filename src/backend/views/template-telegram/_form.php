@@ -25,6 +25,9 @@ use yii\bootstrap4\Html;
         <div class="col-md-12">
             <?= $form->field($model, TemplateTelegram::ATTR_BODY)->textarea(['id' => 'redactor']) ?>
         </div>
+        <div class="col-md-12">
+            <?= $form->field($model, TemplateTelegram::ATTR_KEYBOARD)->textarea() ?>
+        </div>
     </div>
 
     <div class="form-group">

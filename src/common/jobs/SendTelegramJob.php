@@ -7,6 +7,7 @@ use markmoskalenko\mailing\common\models\telegramSendLog\TelegramSendLog;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\templateTelegram\TemplateTelegram;
 use MongoDB\BSON\ObjectId;
+use Telegram\Bot\Api;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\ErrorException;
@@ -46,6 +47,11 @@ class SendTelegramJob extends BaseObject implements JobInterface
     public $user;
 
     /**
+     * @var Api
+     */
+    private $telegram;
+
+    /**
      * Telegram отправителя
      *
      * @var string
@@ -80,7 +86,6 @@ class SendTelegramJob extends BaseObject implements JobInterface
      * @var UserInterface
      */
     public $userClass;
-
 
     /**
      * Шаблон письма
@@ -130,10 +135,11 @@ class SendTelegramJob extends BaseObject implements JobInterface
 
             // Шаблон письма для отправки
             // Ищет по ключу, языку и домену партнера
-            $templateEmail = TemplateTelegram::findByKeyAndLangAndAffiliateDomain($template->_id, $this->user->getLanguage(),
+            $templateTelegram = TemplateTelegram::findByKeyAndLangAndAffiliateDomain($template->_id,
+                $this->user->getLanguage(),
                 $sourceDomain);
 
-            if (!$templateEmail) {
+            if (!$templateTelegram) {
                 throw new ErrorException('Шаблон не найден ' . $this->key . ':' . $sourceDomain);
             }
 
@@ -165,7 +171,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
             $apiEndpoint = ArrayHelper::getValue($this->links, 'api');
 
             // Имя пользователя
-            $body = str_replace('{firstName}', $this->user->getFirstName(), $templateEmail->body);
+            $body = str_replace('{firstName}', $this->user->getFirstName(), $templateTelegram->body);
 
             // Ссылка на проект
             $body = str_replace('{webAppLink}', $webAppLink, $body);
@@ -209,15 +215,19 @@ class SendTelegramJob extends BaseObject implements JobInterface
                 $body = str_replace($key, $value, $body);
             }
 
-            //TODO: сделать отправку письма в телеграм
-            /*$isSend = false;
+            $keyboard = ($templateTelegram->keyboard) ?? false;
+
+            $isSend = $this->sendTelegramMail([
+                'telegramId' => $this->telegramId,
+                'parse_mode' => 'html',
+                'text'       => $body
+            ], $keyboard);
 
             if ($isSend) {
                 $log->send();
             } else {
                 $log->setError('Ошибка отправки');
             }
-            */
         } catch (\Throwable $e) {
             $message = '[Отправитель]: ' . print_r($sender, true);
             $message .= '<br>' . $e->getMessage();
@@ -229,4 +239,43 @@ class SendTelegramJob extends BaseObject implements JobInterface
             throw new $e;
         }
     }
+
+
+    /**
+     * Отправка письма в телеграм
+     * @param      $params
+     * @param bool $encodedKeyboard
+     * @return bool
+     */
+    private function sendTelegramMail($params, $encodedKeyboard = false)
+    {
+        if (ArrayHelper::getValue($params, 'telegramId')) {
+            //&& $this->user->telegramIsActive
+            //&& $this->user->isNotificationTelegram) {
+
+            $configuration = [
+                'chat_id'    => ArrayHelper::getValue($params, 'telegramId'),
+                'parse_mode' => 'html'
+            ];
+
+            if (is_array($encodedKeyboard)) {
+                $configuration['reply_markup'] = $encodedKeyboard;
+            }
+
+            if (ArrayHelper::getValue($params, 'telegramPhoto')) {
+                $this->telegram->sendPhoto(array_merge([
+                    'photo'      => ArrayHelper::getValue($params, 'telegramPhoto'),
+                    'parse_mode' => 'html',
+                    'caption'    => ArrayHelper::getValue($params, 'text')
+                ], $configuration));
+            } else {
+                $this->telegram->sendMessage(array_merge([
+                    'text' => ArrayHelper::getValue($params, 'text')
+                ], $configuration));
+            }
+        }
+
+        return true;
+    }
+
 }

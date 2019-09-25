@@ -18,6 +18,7 @@ use rise\mongoObjectBehavior\MongoObjectIdBehavior;
  * @property string   $body
  * @property string   $affiliateDomain
  * @property string   $picture
+ * @property string   $keyboard
  *
  * @property Template $template
  */
@@ -35,6 +36,7 @@ class TemplateTelegram extends ActiveRecord
     const ATTR_BODY             = 'body';
     const ATTR_AFFILIATE_DOMAIN = 'affiliateDomain';
     const ATTR_PICTURE          = 'picture';
+    const ATTR_KEYBOARD         = 'keyboard';
 
     public static $languages = ['en', 'ru'];
     public static $languagesName = ['en' => 'Английский', 'ru' => 'Русский'];
@@ -68,6 +70,7 @@ class TemplateTelegram extends ActiveRecord
             static::ATTR_BODY,
             static::ATTR_AFFILIATE_DOMAIN,
             static::ATTR_PICTURE,
+            static::ATTR_KEYBOARD,
         ];
     }
 
@@ -84,6 +87,7 @@ class TemplateTelegram extends ActiveRecord
             static::ATTR_BODY             => 'Текст сообщения',
             static::ATTR_AFFILIATE_DOMAIN => 'Партнерский домен',
             static::ATTR_PICTURE          => 'Картинка',
+            static::ATTR_KEYBOARD         => 'Клавиатура',
         ];
     }
 
@@ -108,6 +112,8 @@ class TemplateTelegram extends ActiveRecord
             [static::ATTR_AFFILIATE_DOMAIN, 'string'],
             //
             [static::ATTR_PICTURE, 'string'],
+            //
+            [static::ATTR_KEYBOARD, 'string'],
         ];
     }
 
