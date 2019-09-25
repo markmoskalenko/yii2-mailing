@@ -4,7 +4,9 @@ namespace markmoskalenko\mailing;
 
 use markmoskalenko\mailing\common\interfaces\UserInterface;
 use markmoskalenko\mailing\common\jobs\SendMailiJob;
+use markmoskalenko\mailing\common\jobs\SendTelegramJob;
 use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
+use markmoskalenko\mailing\common\models\telegramSendLog\TelegramSendLog;
 use Yii;
 use yii\base\BootstrapInterface;
 use yii\base\InvalidConfigException;
@@ -21,6 +23,13 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
      * @var string
      */
     public $senderEmail;
+
+    /**
+     * Telegram ID отправителя
+     *
+     * @var string
+     */
+    public $senderTelegramId;
 
     /**
      * Имя отправителя
@@ -96,6 +105,38 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
                 'links'       => $this->_links,
                 'ssl'         => $this->ssl,
                 'userClass'   => $this->userClass
+            ]));
+        } else {
+            //@todo сообщение в телеграм
+        }
+    }
+
+
+    /**
+     * @param        $telegramId
+     * @param string $key
+     * @param array  $data
+     * @param int    $delay
+     */
+    public function sendTelegram($telegramId, $key, $data = [], $delay = 0)
+    {
+        $user = $this->userClass::findByTelegramId($telegramId);
+        $logId = TelegramSendLog::start($telegramId, $key, $user);
+
+        if ($logId !== false) {
+            /** @var yii\queue\redis\Queue $queue */
+            $queue = Yii::$app->get('queue');
+            $queue->delay($delay)->push(new SendTelegramJob([
+                'key'            => $key,
+                'telegramId'     => $telegramId,
+                'data'           => $data,
+                'logId'          => $logId,
+                'senderTelegram' => $this->senderTelegram,
+                'senderName'     => $this->senderName,
+                'ourDomain'      => $this->ourDomain,
+                'links'          => $this->_links,
+                'ssl'            => $this->ssl,
+                'userClass'      => $this->userClass
             ]));
         } else {
             //@todo сообщение в телеграм
