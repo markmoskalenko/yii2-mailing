@@ -7,6 +7,7 @@ use markmoskalenko\mailing\common\jobs\SendMailiJob;
 use markmoskalenko\mailing\common\jobs\SendTelegramJob;
 use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
 use markmoskalenko\mailing\common\models\telegramSendLog\TelegramSendLog;
+use Telegram\Bot\Api;
 use Yii;
 use yii\base\BootstrapInterface;
 use yii\base\InvalidConfigException;
@@ -18,6 +19,13 @@ use yii\base\InvalidConfigException;
 class MailingModule extends \yii\base\Module implements BootstrapInterface
 {
     /**
+     * Telegram API
+     *
+     * @var string
+     */
+    public $telegramApi;
+
+    /**
      * Email отправителя
      *
      * @var string
@@ -25,7 +33,7 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
     public $senderEmail;
 
     /**
-     * Telegram отправителя
+     * Название Telegram отправителя
      *
      * @var string
      */
@@ -127,6 +135,7 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
             $queue = Yii::$app->get('queue');
             $queue->delay($delay)->push(new SendTelegramJob([
                 'key'            => $key,
+                'telegramApi'    => new Api($this->telegramApi),
                 'telegramId'     => $telegramId,
                 'data'           => $data,
                 'logId'          => $logId,

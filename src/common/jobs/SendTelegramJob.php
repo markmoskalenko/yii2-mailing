@@ -27,6 +27,11 @@ class SendTelegramJob extends BaseObject implements JobInterface
     public $key;
 
     /**
+     * @var Api
+     */
+    public $telegramApi;
+
+    /**
      * @var string
      */
     public $telegramId;
@@ -47,12 +52,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
     public $user;
 
     /**
-     * @var Api
-     */
-    private $telegram;
-
-    /**
-     * Telegram отправителя
+     * Название Telegram отправителя
      *
      * @var string
      */
@@ -263,13 +263,13 @@ class SendTelegramJob extends BaseObject implements JobInterface
             }
 
             if (ArrayHelper::getValue($params, 'telegramPhoto')) {
-                $this->telegram->sendPhoto(array_merge([
+                $this->telegramApi->sendPhoto(array_merge([
                     'photo'      => ArrayHelper::getValue($params, 'telegramPhoto'),
                     'parse_mode' => 'html',
                     'caption'    => ArrayHelper::getValue($params, 'text')
                 ], $configuration));
             } else {
-                $this->telegram->sendMessage(array_merge([
+                $this->telegramApi->sendMessage(array_merge([
                     'text' => ArrayHelper::getValue($params, 'text')
                 ], $configuration));
             }
