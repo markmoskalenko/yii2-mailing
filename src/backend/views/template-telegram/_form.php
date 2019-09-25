@@ -14,6 +14,7 @@ use yii\bootstrap4\Html;
         <div class="col-md-6">
             <?= $form->field($model, TemplateTelegram::ATTR_LANG)->dropDownList(TemplateTelegram::$languagesName) ?>
             <?= $form->field($model, TemplateTelegram::ATTR_AFFILIATE_DOMAIN)->hint('Домен партнера без http://. Пример: mybase.pro') ?>
+            <?= $form->field($model, TemplateTelegram::ATTR_PICTURE) ?>
         </div>
         <div class="col-md-6">
             <?= $form->field($model, TemplateTelegram::ATTR_SUBJECT) ?>

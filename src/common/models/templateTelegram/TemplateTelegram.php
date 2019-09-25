@@ -17,6 +17,7 @@ use rise\mongoObjectBehavior\MongoObjectIdBehavior;
  * @property string   $subject
  * @property string   $body
  * @property string   $affiliateDomain
+ * @property string   $picture
  *
  * @property Template $template
  */
@@ -33,6 +34,7 @@ class TemplateTelegram extends ActiveRecord
     const ATTR_SUBJECT          = 'subject';
     const ATTR_BODY             = 'body';
     const ATTR_AFFILIATE_DOMAIN = 'affiliateDomain';
+    const ATTR_PICTURE          = 'picture';
 
     public static $languages = ['en', 'ru'];
     public static $languagesName = ['en' => 'Английский', 'ru' => 'Русский'];
@@ -65,6 +67,7 @@ class TemplateTelegram extends ActiveRecord
             static::ATTR_SUBJECT,
             static::ATTR_BODY,
             static::ATTR_AFFILIATE_DOMAIN,
+            static::ATTR_PICTURE,
         ];
     }
 
@@ -77,9 +80,10 @@ class TemplateTelegram extends ActiveRecord
             static::ATTR_MONGO_ID         => 'ID',
             static::ATTR_TEMPLATE_ID      => 'Шаблон',
             static::ATTR_LANG             => 'Язык',
-            static::ATTR_SUBJECT          => 'Тема письма',
-            static::ATTR_BODY             => 'Письмо',
+            static::ATTR_SUBJECT          => 'Название письма для админки',
+            static::ATTR_BODY             => 'Текст сообщения',
             static::ATTR_AFFILIATE_DOMAIN => 'Партнерский домен',
+            static::ATTR_PICTURE          => 'Картинка',
         ];
     }
 
@@ -102,6 +106,8 @@ class TemplateTelegram extends ActiveRecord
             //
             [static::ATTR_AFFILIATE_DOMAIN, 'required'],
             [static::ATTR_AFFILIATE_DOMAIN, 'string'],
+            //
+            [static::ATTR_PICTURE, 'string'],
         ];
     }
 

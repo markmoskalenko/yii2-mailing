@@ -46,11 +46,11 @@ class SendTelegramJob extends BaseObject implements JobInterface
     public $user;
 
     /**
-     * Telegram ID отправителя
+     * Telegram отправителя
      *
      * @var string
      */
-    public $senderTelegramId;
+    public $senderTelegram;
 
     /**
      * Имя отправителя
@@ -102,7 +102,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
         $template = Template::findByKey($this->key);
 
         $log = TelegramSendLog::findOne($this->logId);
-        $sender = [$this->senderTelegramId => $this->senderName];
+        $sender = [$this->senderTelegram => $this->senderName];
 
         try {
             if (!$log) {
@@ -125,11 +125,11 @@ class SendTelegramJob extends BaseObject implements JobInterface
             $referral = $this->user->getReferralByAffiliateDomain()->one();
 
             // Домен на который будут перенаправлять все письма
-            // Если нету партнера тогда ставим наш домен
+            // Если нет партнера, тогда ставим наш домен
             $sourceDomain = $referral ? $referral->affiliateDomain : $this->ourDomain;
 
             // Шаблон письма для отправки
-            // Ищет по ключу, языку и домены партнера
+            // Ищет по ключу, языку и домену партнера
             $templateEmail = TemplateTelegram::findByKeyAndLangAndAffiliateDomain($template->_id, $this->user->getLanguage(),
                 $sourceDomain);
 
@@ -209,18 +209,15 @@ class SendTelegramJob extends BaseObject implements JobInterface
                 $body = str_replace($key, $value, $body);
             }
 
-            $isSend = $mailer
-                ->compose('layouts/' . $this->layout, ['content' => $body])
-                ->setSubject($templateEmail->subject)
-                ->setFrom($sender)
-                ->setTo($this->email)
-                ->send();
+            //TODO: сделать отправку письма в телеграм
+            /*$isSend = false;
 
             if ($isSend) {
                 $log->send();
             } else {
                 $log->setError('Ошибка отправки');
             }
+            */
         } catch (\Throwable $e) {
             $message = '[Отправитель]: ' . print_r($sender, true);
             $message .= '<br>' . $e->getMessage();

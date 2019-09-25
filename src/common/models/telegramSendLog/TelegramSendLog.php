@@ -169,7 +169,7 @@ class TelegramSendLog extends ActiveRecord
         $model->isSend = false;
 
         if (!$template) {
-            $model->error = "Шаблон {$templateKey} для пользователя с почтой {$email} не найден";
+            $model->error = "Шаблон {$templateKey} для пользователя с telegramId {$telegramId} не найден";
             $model->theme = $templateKey;
             $model->save();
 
@@ -179,7 +179,7 @@ class TelegramSendLog extends ActiveRecord
         $model->theme = $template->name;
 
         if (!$user) {
-            $model->error = "Пользователь с почтой {$email} не найден";
+            $model->error = "Пользователь с telegramId {$telegramId} не найден";
             $model->save();
 
             return false;

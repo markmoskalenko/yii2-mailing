@@ -25,11 +25,11 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
     public $senderEmail;
 
     /**
-     * Telegram ID отправителя
+     * Telegram отправителя
      *
      * @var string
      */
-    public $senderTelegramId;
+    public $senderTelegram;
 
     /**
      * Имя отправителя
@@ -110,7 +110,6 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
             //@todo сообщение в телеграм
         }
     }
-
 
     /**
      * @param        $telegramId
