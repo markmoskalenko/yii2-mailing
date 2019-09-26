@@ -41,7 +41,7 @@ class TelegramSendLog extends ActiveRecord
     const ATTR_MONGO_ID     = '_id';
     const ATTR_THEME        = 'theme';
     const ATTR_USER_ID      = 'userId';
-    const ATTR_TELEGRAM     = 'telegram';
+    const ATTR_TELEGRAM     = 'telegramId';
     const ATTR_CREATED_AT   = 'createdAt';
     const ATTR_SEND_AT      = 'sendAt';
     const ATTR_OPEN_AT      = 'openAt';
