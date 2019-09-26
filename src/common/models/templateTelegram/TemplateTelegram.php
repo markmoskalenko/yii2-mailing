@@ -19,6 +19,7 @@ use rise\mongoObjectBehavior\MongoObjectIdBehavior;
  * @property string   $affiliateDomain
  * @property string   $picture
  * @property string   $keyboard
+ * @property bool     $isInlineKeyboard
  *
  * @property Template $template
  */
@@ -28,15 +29,16 @@ class TemplateTelegram extends ActiveRecord
     use TemplateTelegramFinder;
     use TemplateTelegramFormatter;
 
-    const ATTR_MONGO_ID         = '_id';
-    const ATTR_ID               = 'id';
-    const ATTR_TEMPLATE_ID      = 'templateId';
-    const ATTR_LANG             = 'lang';
-    const ATTR_SUBJECT          = 'subject';
-    const ATTR_BODY             = 'body';
-    const ATTR_AFFILIATE_DOMAIN = 'affiliateDomain';
-    const ATTR_PICTURE          = 'picture';
-    const ATTR_KEYBOARD         = 'keyboard';
+    const ATTR_MONGO_ID           = '_id';
+    const ATTR_ID                 = 'id';
+    const ATTR_TEMPLATE_ID        = 'templateId';
+    const ATTR_LANG               = 'lang';
+    const ATTR_SUBJECT            = 'subject';
+    const ATTR_BODY               = 'body';
+    const ATTR_AFFILIATE_DOMAIN   = 'affiliateDomain';
+    const ATTR_PICTURE            = 'picture';
+    const ATTR_KEYBOARD           = 'keyboard';
+    const ATTR_IS_INLINE_KEYBOARD = 'isInlineKeyboard';
 
     public static $languages = ['en', 'ru'];
     public static $languagesName = ['en' => 'Английский', 'ru' => 'Русский'];
@@ -71,6 +73,7 @@ class TemplateTelegram extends ActiveRecord
             static::ATTR_AFFILIATE_DOMAIN,
             static::ATTR_PICTURE,
             static::ATTR_KEYBOARD,
+            static::ATTR_IS_INLINE_KEYBOARD,
         ];
     }
 
@@ -80,14 +83,15 @@ class TemplateTelegram extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            static::ATTR_MONGO_ID         => 'ID',
-            static::ATTR_TEMPLATE_ID      => 'Шаблон',
-            static::ATTR_LANG             => 'Язык',
-            static::ATTR_SUBJECT          => 'Название письма для админки',
-            static::ATTR_BODY             => 'Текст сообщения',
-            static::ATTR_AFFILIATE_DOMAIN => 'Партнерский домен',
-            static::ATTR_PICTURE          => 'Картинка',
-            static::ATTR_KEYBOARD         => 'Клавиатура',
+            static::ATTR_MONGO_ID           => 'ID',
+            static::ATTR_TEMPLATE_ID        => 'Шаблон',
+            static::ATTR_LANG               => 'Язык',
+            static::ATTR_SUBJECT            => 'Название письма для админки',
+            static::ATTR_BODY               => 'Текст сообщения',
+            static::ATTR_AFFILIATE_DOMAIN   => 'Партнерский домен',
+            static::ATTR_PICTURE            => 'Картинка',
+            static::ATTR_KEYBOARD           => 'Клавиатура',
+            static::ATTR_IS_INLINE_KEYBOARD => 'Инлайн клавиатура',
         ];
     }
 
@@ -114,6 +118,8 @@ class TemplateTelegram extends ActiveRecord
             [static::ATTR_PICTURE, 'string'],
             //
             [static::ATTR_KEYBOARD, 'string'],
+            //
+            [static::ATTR_IS_INLINE_KEYBOARD, 'bool'],
         ];
     }
 

@@ -8,6 +8,7 @@ use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\templateTelegram\TemplateTelegram;
 use MongoDB\BSON\ObjectId;
 use Telegram\Bot\Api;
+use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\ErrorException;
@@ -223,7 +224,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
                 'telegramId' => $this->telegramId,
                 'parse_mode' => 'html',
                 'text'       => $body
-            ], $keyboard);
+            ], $keyboard, $templateTelegram->isInlineKeyboard);
 
             if ($isSend) {
                 $log->send();
@@ -245,11 +246,12 @@ class SendTelegramJob extends BaseObject implements JobInterface
 
     /**
      * Отправка письма в телеграм
-     * @param      $params
-     * @param bool $encodedKeyboard
+     * @param            $params
+     * @param array|bool $encodedKeyboard
+     * @param bool       $isInlineKeyboard
      * @return bool
      */
-    private function sendTelegramMail($params, $encodedKeyboard = false)
+    private function sendTelegramMail($params, $encodedKeyboard = false, $isInlineKeyboard = false)
     {
         if (ArrayHelper::getValue($params, 'telegramId')) {
             //&& $this->user->telegramIsActive
@@ -261,8 +263,11 @@ class SendTelegramJob extends BaseObject implements JobInterface
             ];
 
             if (is_array($encodedKeyboard)) {
-                $configuration['reply_markup'] = json_encode($encodedKeyboard);
+                $configuration['reply_markup'] = ($isInlineKeyboard)
+                    ? new InlineKeyboardMarkup($encodedKeyboard)
+                    : new InlineKeyboardMarkup($encodedKeyboard);
             }
+
 
             if (ArrayHelper::getValue($params, 'telegramPhoto')) {
                 $this->telegramApi->sendPhoto(array_merge([

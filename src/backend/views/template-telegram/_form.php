@@ -27,6 +27,7 @@ use yii\bootstrap4\Html;
         </div>
         <div class="col-md-12">
             <?= $form->field($model, TemplateTelegram::ATTR_KEYBOARD)->textarea() ?>
+            <?= $form->field($model, TemplateTelegram::ATTR_IS_INLINE_KEYBOARD)->checkbox() ?>
         </div>
     </div>
 
