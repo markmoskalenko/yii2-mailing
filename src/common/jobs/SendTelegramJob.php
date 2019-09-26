@@ -27,6 +27,12 @@ class SendTelegramJob extends BaseObject implements JobInterface
     public $key;
 
     /**
+     * Telegram token Api
+     * @var string
+     */
+    public $telegramTokenApi;
+
+    /**
      * @var Api
      */
     public $telegramApi;
@@ -102,6 +108,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
      */
     public function execute($queue)
     {
+        $this->telegramApi = new Api($this->telegramTokenApi);
         $this->user = $this->userClass::findByTelegramId($this->telegramId);
 
         $template = Template::findByKey($this->key);

@@ -19,11 +19,11 @@ use yii\base\InvalidConfigException;
 class MailingModule extends \yii\base\Module implements BootstrapInterface
 {
     /**
-     * Telegram API
+     * Telegram token API
      *
      * @var string
      */
-    public $telegramApi;
+    public $telegramTokenApi;
 
     /**
      * Email отправителя
@@ -134,17 +134,17 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
             /** @var yii\queue\redis\Queue $queue */
             $queue = Yii::$app->get('queue');
             $queue->delay($delay)->push(new SendTelegramJob([
-                'key'            => $key,
-                'telegramApi'    => new Api($this->telegramApi),
-                'telegramId'     => $telegramId,
-                'data'           => $data,
-                'logId'          => $logId,
-                'senderTelegram' => $this->senderTelegram,
-                'senderName'     => $this->senderName,
-                'ourDomain'      => $this->ourDomain,
-                'links'          => $this->_links,
-                'ssl'            => $this->ssl,
-                'userClass'      => $this->userClass
+                'key'              => $key,
+                'telegramTokenApi' => $this->telegramTokenApi,
+                'telegramId'       => $telegramId,
+                'data'             => $data,
+                'logId'            => $logId,
+                'senderTelegram'   => $this->senderTelegram,
+                'senderName'       => $this->senderName,
+                'ourDomain'        => $this->ourDomain,
+                'links'            => $this->_links,
+                'ssl'              => $this->ssl,
+                'userClass'        => $this->userClass
             ]));
         } else {
             //@todo сообщение в телеграм
