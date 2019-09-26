@@ -261,7 +261,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
             ];
 
             if (is_array($encodedKeyboard)) {
-                $configuration['reply_markup'] = $encodedKeyboard;
+                $configuration['reply_markup'] = json_encode($encodedKeyboard);
             }
 
             if (ArrayHelper::getValue($params, 'telegramPhoto')) {
