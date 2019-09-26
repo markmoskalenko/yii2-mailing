@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /* @var $searchModel TemplateSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Лог отправки писем';
+$this->title = 'Лог отправки писем в телеграм';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="page-header row no-gutters py-4">
