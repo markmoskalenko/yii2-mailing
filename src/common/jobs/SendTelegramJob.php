@@ -205,11 +205,6 @@ class SendTelegramJob extends BaseObject implements JobInterface
             $body = str_replace('url(\'/images', 'url(\'' . $apiEndpoint . '/images', $body);
             $body = str_replace('url(/images', 'url(' . $apiEndpoint . '/images', $body);
 
-            // Пиксель для проверки открытия письма
-            $body .= Html::img("{$apiEndpoint}/mailing/pixel/open/{$this->logId}.png", [
-                'style' => 'positions: absolute; left: -99999px;bottom:-99999px; width:0px; height: 0px;'
-            ]);
-
             // Подмена данных в шаблоне из переданных переменных
             foreach ((array)$this->data as $key => $value) {
                 $body = str_replace($key, $value, $body);
