@@ -1,6 +1,6 @@
 <?php
 
-namespace markmoskalenko\mailing\common\models\emailSendLog;
+namespace markmoskalenko\mailing\common\models\telegramSendLog;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -8,7 +8,7 @@ use yii\data\ActiveDataProvider;
 /**
  *
  */
-class EmailSendLogSearch extends EmailSendLog
+class TelegramSendLogSearch extends TelegramSendLog
 {
     /**
      * @inheritdoc
@@ -16,7 +16,7 @@ class EmailSendLogSearch extends EmailSendLog
     public function rules()
     {
         return [
-            ['email', 'safe']
+            ['telegramId', 'safe']
         ];
     }
 
@@ -37,7 +37,7 @@ class EmailSendLogSearch extends EmailSendLog
      */
     public function search($params)
     {
-        $query = EmailSendLog::find();
+        $query = TelegramSendLog::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -55,7 +55,7 @@ class EmailSendLogSearch extends EmailSendLog
 
     public function searchAdmin($params)
     {
-        $query = EmailSendLog::find();
+        $query = TelegramSendLog::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -68,7 +68,7 @@ class EmailSendLogSearch extends EmailSendLog
             return [];
         }
 
-        $query->andFilterWhere(['like', 'email', $this->email]);
+        $query->andFilterWhere(['like', 'telegramId', $this->telegramId]);
 
         return $dataProvider;
     }

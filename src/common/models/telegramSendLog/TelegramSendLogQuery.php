@@ -1,13 +1,13 @@
 <?php
 
-namespace markmoskalenko\mailing\common\models\emailSendLog;
+namespace markmoskalenko\mailing\common\models\telegramSendLog;
 
 use MongoDB\BSON\ObjectId;
 use yii\mongodb\ActiveQuery;
 
 /**
- * Class EmailSendLogQuery
+ * Class TelegramSendLogQuery
  */
-class EmailSendLogQuery extends ActiveQuery
+class TelegramSendLogQuery extends ActiveQuery
 {
 }

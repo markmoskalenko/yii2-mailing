@@ -1,10 +1,10 @@
 <?php
 
-namespace markmoskalenko\mailing\common\models\emailSendLog;
+namespace markmoskalenko\mailing\common\models\telegramSendLog;
 
 /**
  *
  */
-trait EmailSendLogRelations
+trait TelegramSendLogRelations
 {
 }

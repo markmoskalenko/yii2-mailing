@@ -1,11 +1,11 @@
 <?php
 
-namespace markmoskalenko\mailing\common\models\emailSendLog;
+namespace markmoskalenko\mailing\common\models\telegramSendLog;
 
 /**
  *
  */
-trait EmailSendLogFormatter
+trait TelegramSendLogFormatter
 {
     /**
      * @return mixed
