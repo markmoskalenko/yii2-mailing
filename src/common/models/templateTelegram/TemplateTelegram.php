@@ -19,7 +19,7 @@ use rise\mongoObjectBehavior\MongoObjectIdBehavior;
  * @property string   $affiliateDomain
  * @property string   $picture
  * @property string   $keyboard
- * @property bool     $isInlineKeyboard
+ * @property boolean  $isInlineKeyboard
  *
  * @property Template $template
  */
@@ -119,7 +119,8 @@ class TemplateTelegram extends ActiveRecord
             //
             [static::ATTR_KEYBOARD, 'string'],
             //
-            [static::ATTR_IS_INLINE_KEYBOARD, 'bool'],
+            [static::ATTR_IS_INLINE_KEYBOARD, 'boolean'],
+            [static::ATTR_IS_INLINE_KEYBOARD, 'default', 'value' => false],
         ];
     }
 
