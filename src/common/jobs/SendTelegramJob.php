@@ -7,8 +7,11 @@ use markmoskalenko\mailing\common\models\telegramSendLog\TelegramSendLog;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\templateTelegram\TemplateTelegram;
 use MongoDB\BSON\ObjectId;
-use Telegram\Bot\Api;
+use TelegramBot\Api\BotApi;
+use TelegramBot\Api\Types\ForceReply;
 use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
+use TelegramBot\Api\Types\ReplyKeyboardMarkup;
+use TelegramBot\Api\Types\Message;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\ErrorException;
@@ -34,7 +37,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
     public $telegramTokenApi;
 
     /**
-     * @var Api
+     * @var BotApi
      */
     public $telegramApi;
 
@@ -109,7 +112,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
      */
     public function execute($queue)
     {
-        $this->telegramApi = new Api($this->telegramTokenApi);
+        $this->telegramApi = new BotApi($this->telegramTokenApi);
         $this->user = $this->userClass::findByTelegramId($this->telegramId);
 
         $template = Template::findByKey($this->key);
@@ -257,32 +260,37 @@ class SendTelegramJob extends BaseObject implements JobInterface
             //&& $this->user->telegramIsActive
             //&& $this->user->isNotificationTelegram) {
 
-            $configuration = [
-                'chat_id'    => ArrayHelper::getValue($params, 'telegramId'),
-                'parse_mode' => 'html'
-            ];
+            $replyMarkup = null;
 
             if (is_array($encodedKeyboard)) {
-                $configuration['reply_markup'] = ($isInlineKeyboard)
+                $replyMarkup = ($isInlineKeyboard)
                     ? new InlineKeyboardMarkup($encodedKeyboard)
-                    : new InlineKeyboardMarkup($encodedKeyboard);
+                    : new ReplyKeyboardMarkup($encodedKeyboard);
             }
 
-
             if (ArrayHelper::getValue($params, 'telegramPhoto')) {
-                $this->telegramApi->sendPhoto(array_merge([
-                    'photo'      => ArrayHelper::getValue($params, 'telegramPhoto'),
-                    'parse_mode' => 'html',
-                    'caption'    => ArrayHelper::getValue($params, 'text')
-                ], $configuration));
+                $this->telegramApi->sendPhoto(
+                    ArrayHelper::getValue($params, 'telegramId'),
+                    ArrayHelper::getValue($params, 'telegramPhoto'),
+                    ArrayHelper::getValue($params, 'text'),
+                    null,
+                    $replyMarkup,
+                    false,
+                    'html'
+                );
             } else {
-                $this->telegramApi->sendMessage(array_merge([
-                    'text' => ArrayHelper::getValue($params, 'text')
-                ], $configuration));
+                $this->telegramApi->sendMessage(
+                    ArrayHelper::getValue($params, 'telegramId'),
+                    ArrayHelper::getValue($params, 'text'),
+                    null,
+                    false,
+                    null,
+                    $replyMarkup,
+                    false
+                );
             }
         }
 
         return true;
     }
-
 }
