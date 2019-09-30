@@ -1,7 +1,7 @@
 <?php
 
 use markmoskalenko\mailing\backend\grid\ActionColumn;
-use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
+use markmoskalenko\mailing\common\models\telegramSendLog\TelegramSendLog;
 use markmoskalenko\mailing\common\models\template\TemplateSearch;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /* @var $searchModel TemplateSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Лог отправки писем на почту';
+$this->title = 'Лог отправки писем в телеграм';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="page-header row no-gutters py-4">
@@ -47,9 +47,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'columns'      => [
                         [
-                            'attribute' => EmailSendLog::ATTR_CREATED_AT,
+                            'attribute' => TelegramSendLog::ATTR_CREATED_AT,
                             'format'    => 'raw',
-                            'value'     => function (EmailSendLog $item)
+                            'value'     => function (TelegramSendLog $item)
                             {
                                 $html = '<strong>' . $item->theme . '</strong><br>';
                                 $html .= 'Создано: ' . $item->createdAtFormatAdmin() . '<br>';
@@ -61,11 +61,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             }
                         ],
                         [
-                            'attribute' => EmailSendLog::ATTR_EMAIL,
+                            'attribute' => TelegramSendLog::ATTR_TELEGRAM,
                         ],
                         [
                             'format'    => 'raw',
-                            'attribute' => EmailSendLog::ATTR_ERROR,
+                            'attribute' => TelegramSendLog::ATTR_ERROR,
                         ],
                         [
                             'class'    => ActionColumn::class,

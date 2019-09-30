@@ -56,6 +56,12 @@ interface UserInterface
     public static function findByEmail(string $email);
 
     /**
+     * @param string $telegramId
+     * @return UserInterface
+     */
+    public static function findByTelegramId(string $telegramId);
+
+    /**
      * @param string $code
      * @return UserInterface
      */

@@ -57,9 +57,14 @@ class TemplateController extends Controller
             'query' => $model->getTemplateEmail()
         ]);
 
+        $templateTelegramProvider = new ActiveDataProvider([
+            'query' => $model->getTemplateTelegram()
+        ]);
+
         return $this->render('view', [
             'model'                 => $model,
             'templateEmailProvider' => $templateEmailProvider,
+            'templateTelegramProvider' => $templateTelegramProvider,
         ]);
     }
 
