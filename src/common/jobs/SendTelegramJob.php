@@ -221,7 +221,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
                 $body = str_replace($key, $value, $body);
             }
 
-            $keyboard = ($templateTelegram->keyboard) ?? false;
+            $keyboard = ($templateTelegram->keyboard) ? json_decode($templateTelegram->keyboard, true) : false;
 
             $isSend = $this->sendTelegramMail([
                 'telegramId' => $this->telegramId,
@@ -250,11 +250,11 @@ class SendTelegramJob extends BaseObject implements JobInterface
     /**
      * Отправка письма в телеграм
      * @param            $params
-     * @param array|bool $encodedKeyboard
+     * @param array|bool $keyboard
      * @param bool       $isInlineKeyboard
      * @return bool
      */
-    private function sendTelegramMail($params, $encodedKeyboard = false, $isInlineKeyboard = false)
+    private function sendTelegramMail($params, $keyboard = false, $isInlineKeyboard = false)
     {
         if (ArrayHelper::getValue($params, 'telegramId')) {
             //&& $this->user->telegramIsActive
@@ -262,10 +262,10 @@ class SendTelegramJob extends BaseObject implements JobInterface
 
             $replyMarkup = null;
 
-            if (is_array($encodedKeyboard)) {
+            if (is_array($keyboard)) {
                 $replyMarkup = ($isInlineKeyboard)
-                    ? new InlineKeyboardMarkup($encodedKeyboard)
-                    : new ReplyKeyboardMarkup($encodedKeyboard);
+                    ? new InlineKeyboardMarkup($keyboard)
+                    : new ReplyKeyboardMarkup($keyboard);
             }
 
             if (ArrayHelper::getValue($params, 'telegramPhoto')) {
@@ -289,8 +289,10 @@ class SendTelegramJob extends BaseObject implements JobInterface
                     false
                 );
             }
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 }
