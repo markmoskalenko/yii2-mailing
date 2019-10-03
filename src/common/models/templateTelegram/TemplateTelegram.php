@@ -90,7 +90,7 @@ class TemplateTelegram extends ActiveRecord
             static::ATTR_BODY               => 'Текст сообщения',
             static::ATTR_AFFILIATE_DOMAIN   => 'Партнерский домен',
             static::ATTR_PICTURE            => 'Картинка',
-            static::ATTR_KEYBOARD           => 'Клавиатура (в json)',
+            static::ATTR_KEYBOARD           => 'Клавиатура (массив)',
             static::ATTR_IS_INLINE_KEYBOARD => 'Инлайн клавиатура',
         ];
     }
