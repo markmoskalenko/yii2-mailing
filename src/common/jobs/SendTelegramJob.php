@@ -3,10 +3,15 @@
 namespace markmoskalenko\mailing\common\jobs;
 
 use markmoskalenko\mailing\common\interfaces\UserInterface;
-use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
+use markmoskalenko\mailing\common\models\telegramSendLog\TelegramSendLog;
 use markmoskalenko\mailing\common\models\template\Template;
-use markmoskalenko\mailing\common\models\templateEmail\TemplateEmail;
+use markmoskalenko\mailing\common\models\templateTelegram\TemplateTelegram;
 use MongoDB\BSON\ObjectId;
+use TelegramBot\Api\BotApi;
+use TelegramBot\Api\Types\ForceReply;
+use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
+use TelegramBot\Api\Types\ReplyKeyboardMarkup;
+use TelegramBot\Api\Types\Message;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\ErrorException;
@@ -18,7 +23,7 @@ use yii\swiftmailer\Mailer;
 /**
  *
  */
-class SendMailiJob extends BaseObject implements JobInterface
+class SendTelegramJob extends BaseObject implements JobInterface
 {
     /**
      * @var ObjectId
@@ -26,9 +31,20 @@ class SendMailiJob extends BaseObject implements JobInterface
     public $key;
 
     /**
+     * Telegram token Api
      * @var string
      */
-    public $email;
+    public $telegramTokenApi;
+
+    /**
+     * @var BotApi
+     */
+    public $telegramApi;
+
+    /**
+     * @var string
+     */
+    public $telegramId;
 
     /**
      * @var array
@@ -46,11 +62,11 @@ class SendMailiJob extends BaseObject implements JobInterface
     public $user;
 
     /**
-     * Email отправителя
+     * Название Telegram отправителя
      *
      * @var string
      */
-    public $senderEmail;
+    public $senderTelegram;
 
     /**
      * Имя отправителя
@@ -81,7 +97,6 @@ class SendMailiJob extends BaseObject implements JobInterface
      */
     public $userClass;
 
-
     /**
      * Шаблон письма
      *
@@ -97,26 +112,27 @@ class SendMailiJob extends BaseObject implements JobInterface
      */
     public function execute($queue)
     {
-        $this->user = $this->userClass::findByEmail($this->email);
+        $this->telegramApi = new BotApi($this->telegramTokenApi);
+        $this->user = $this->userClass::findByTelegramId($this->telegramId);
 
         $template = Template::findByKey($this->key);
 
-        $log = EmailSendLog::findOne($this->logId);
-        $sender = [$this->senderEmail => $this->senderName];
-
-        if (!$log) {
-            // в телеграм
-            throw new ErrorException('Лог не найден');
-        }
+        $log = TelegramSendLog::findOne($this->logId);
+        $sender = [$this->senderTelegram => $this->senderName];
 
         try {
+            if (!$log) {
+                // в телеграм
+                throw new ErrorException('Лог не найден');
+            }
+
 
             if (!$template) {
                 throw new ErrorException('Шаблон не найден ' . $this->key);
             }
 
             if (!$this->user) {
-                throw new ErrorException('Пользователь не найден ' . $this->email);
+                throw new ErrorException('Пользователь не найден ' . $this->telegramId);
             }
 
 
@@ -125,54 +141,35 @@ class SendMailiJob extends BaseObject implements JobInterface
             $referral = $this->user->getReferralByAffiliateDomain()->one();
 
             // Домен на который будут перенаправлять все письма
-            // Если нету партнера тогда ставим наш домен
+            // Если нет партнера, тогда ставим наш домен
             $sourceDomain = $referral ? $referral->affiliateDomain : $this->ourDomain;
 
             // Шаблон письма для отправки
-            // Ищет по ключу, языку и домены партнера
-            $templateEmail = TemplateEmail::findByKeyAndLangAndAffiliateDomain($template->_id, $this->user->getLanguage(),
+            // Ищет по ключу, языку и домену партнера
+            $templateTelegram = TemplateTelegram::findByKeyAndLangAndAffiliateDomain($template->_id,
+                $this->user->getLanguage(),
                 $sourceDomain);
 
-            if (!$templateEmail) {
+            if (!$templateTelegram) {
                 throw new ErrorException('Шаблон не найден ' . $this->key . ':' . $sourceDomain);
             }
 
             $webAppLink = ArrayHelper::getValue($this->links, 'webApp');
+            $singInLink = ArrayHelper::getValue($this->links, 'signIn');
+            $paymentLink = ArrayHelper::getValue($this->links, 'payment');
             $unsubscribeLink = ArrayHelper::getValue($this->links, 'unsubscribe');
+
             $unsubscribeLink .= "?email={$this->user->getEmail()}";
+
             $scheme = $this->ssl ? 'https://' : 'http://';
 
             // Корневая ссылка на app.
             $webAppLink = $scheme . str_replace('{host}', $sourceDomain, $webAppLink);
 
-            if ($referral
-                && $referral->affiliateSmtpSenderEmail
-                && $referral->affiliateSmtpSenderName
-                && $referral->affiliateSmtpHost
-                && $referral->affiliateSmtpEncryption
-                && $referral->affiliateSmtpUsername
-                && $referral->affiliateSmtpPassword
-                && $referral->affiliateSmtpPort) {
-
-                /** @var Mailer $mailer */
-                $mailer = Yii::createObject([
-                    'class'     => Mailer::class,
-                    'viewPath'  => '@common/mail',
-                    'transport' => [
-                        'class'      => 'Swift_SmtpTransport',
-                        'host'       => $referral->affiliateSmtpHost,
-                        'encryption' => $referral->affiliateSmtpEncryption,
-                        'username'   => $referral->affiliateSmtpUsername,
-                        'password'   => $referral->affiliateSmtpPassword,
-                        'port'       => $referral->affiliateSmtpPort,
-                    ],
-                ]);
-
-                $sender = [$referral->affiliateSmtpSenderEmail => $referral->affiliateSmtpSenderName];
-            } else {
-                $mailer = Yii::$app->mailer;
-            }
-
+            // Ссылка на регистрацию
+            $singInLink = str_replace('{host}', $webAppLink, $singInLink);
+            // Ссылка на оплату
+            $paymentLink = str_replace('{host}', $webAppLink, $paymentLink);
             // Ссылка отписаться от рассылок
             $unsubscribeLink = str_replace('{host}', $webAppLink, $unsubscribeLink);
 
@@ -185,10 +182,16 @@ class SendMailiJob extends BaseObject implements JobInterface
             $apiEndpoint = ArrayHelper::getValue($this->links, 'api');
 
             // Имя пользователя
-            $body = str_replace('{firstName}', $this->user->getFirstName(), $templateEmail->body);
+            $body = str_replace('{firstName}', $this->user->getFirstName(), $templateTelegram->body);
 
             // Ссылка на проект
             $body = str_replace('{webAppLink}', $webAppLink, $body);
+
+            // Ссылка на авторизацию
+            $body = str_replace('{singInLink}', $singInLink, $body);
+
+            // Ссылка на оплату
+            $body = str_replace('{paymentLink}', $paymentLink, $body);
 
             // Почта
             $body = str_replace('{email}', $this->user->getEmail(), $body);
@@ -213,22 +216,18 @@ class SendMailiJob extends BaseObject implements JobInterface
             $body = str_replace('url(\'/images', 'url(\'' . $apiEndpoint . '/images', $body);
             $body = str_replace('url(/images', 'url(' . $apiEndpoint . '/images', $body);
 
-            // Пиксель для проверки открытия письма
-            $body .= Html::img("{$apiEndpoint}/mailing/pixel/open/{$this->logId}.png", [
-                'style' => 'positions: absolute; left: -99999px;bottom:-99999px; width:0px; height: 0px;'
-            ]);
-
             // Подмена данных в шаблоне из переданных переменных
             foreach ((array)$this->data as $key => $value) {
                 $body = str_replace($key, $value, $body);
             }
 
-            $isSend = $mailer
-                ->compose('layouts/' . $this->layout, ['content' => $body])
-                ->setSubject($templateEmail->subject)
-                ->setFrom($sender)
-                ->setTo($this->email)
-                ->send();
+            $keyboard = ($templateTelegram->keyboard) ? json_decode($templateTelegram->keyboard, true) : false;
+
+            $isSend = $this->sendTelegramMail([
+                'telegramId' => $this->telegramId,
+                'parse_mode' => 'html',
+                'text'       => $body
+            ], $keyboard, $templateTelegram->isInlineKeyboard);
 
             if ($isSend) {
                 $log->send();
@@ -241,11 +240,59 @@ class SendMailiJob extends BaseObject implements JobInterface
 
             $message .= '<br>' . $e->getTraceAsString();
 
-            echo $message . PHP_EOL;
-
             $log->setError($message);
 
             throw new $e;
         }
+    }
+
+
+    /**
+     * Отправка письма в телеграм
+     * @param            $params
+     * @param array|bool $keyboard
+     * @param bool       $isInlineKeyboard
+     * @return bool
+     */
+    private function sendTelegramMail($params, $keyboard = false, $isInlineKeyboard = false)
+    {
+        if (ArrayHelper::getValue($params, 'telegramId')) {
+            //&& $this->user->telegramIsActive
+            //&& $this->user->isNotificationTelegram) {
+
+            $replyMarkup = null;
+
+            if (is_array($keyboard)) {
+                $replyMarkup = ($isInlineKeyboard)
+                    ? new InlineKeyboardMarkup($keyboard)
+                    : new ReplyKeyboardMarkup($keyboard);
+            }
+
+            if (ArrayHelper::getValue($params, 'telegramPhoto')) {
+                $this->telegramApi->sendPhoto(
+                    ArrayHelper::getValue($params, 'telegramId'),
+                    ArrayHelper::getValue($params, 'telegramPhoto'),
+                    ArrayHelper::getValue($params, 'text'),
+                    null,
+                    $replyMarkup,
+                    false,
+                    'html'
+                );
+            } else {
+                $this->telegramApi->sendMessage(
+                    ArrayHelper::getValue($params, 'telegramId'),
+                    ArrayHelper::getValue($params, 'text'),
+                    null,
+                    false,
+                    null,
+                    $replyMarkup,
+                    false
+                );
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace markmoskalenko\mailing\common\models\emailSendLog;
+namespace markmoskalenko\mailing\common\models\telegramSendLog;
 
 use markmoskalenko\mailing\common\interfaces\UserInterface;
 use markmoskalenko\mailing\common\models\ActiveRecord;
@@ -12,28 +12,28 @@ use mongosoft\mongodb\MongoDateBehavior;
 /**
  * Шаблоны для писем
  *
- * @property string      $_id
- * @property ObjectId    $userId
- * @property string      $email
- * @property string      $theme
- * @property UTCDateTime $createdAt
- * @property UTCDateTime $sendAt
- * @property UTCDateTime $openAt
- * @property boolean     $isSend
- * @property string      $error
- * @property string      $openIp
- * @property string      $templateKey
- * @property string      $logStep
+ * @property string        $_id
+ * @property ObjectId      $userId
+ * @property string        $telegramId
+ * @property string        $theme
+ * @property UTCDateTime   $createdAt
+ * @property UTCDateTime   $sendAt
+ * @property UTCDateTime   $openAt
+ * @property boolean       $isSend
+ * @property string        $error
+ * @property string        $openIp
+ * @property string        $templateKey
+ * @property string        $logStep
  *
  * @property UserInterface $user
- * 
+ *
  * @mixin MongoDateBehavior
  */
-class EmailSendLog extends ActiveRecord
+class TelegramSendLog extends ActiveRecord
 {
-    use EmailSendLogRelations;
-    use EmailSendLogFinder;
-    use EmailSendLogFormatter;
+    use TelegramSendLogRelations;
+    use TelegramSendLogFinder;
+    use TelegramSendLogFormatter;
 
     const LOG_STEP_START = 'start';
 
@@ -41,7 +41,7 @@ class EmailSendLog extends ActiveRecord
     const ATTR_MONGO_ID     = '_id';
     const ATTR_THEME        = 'theme';
     const ATTR_USER_ID      = 'userId';
-    const ATTR_EMAIL        = 'email';
+    const ATTR_TELEGRAM     = 'telegramId';
     const ATTR_CREATED_AT   = 'createdAt';
     const ATTR_SEND_AT      = 'sendAt';
     const ATTR_OPEN_AT      = 'openAt';
@@ -52,11 +52,11 @@ class EmailSendLog extends ActiveRecord
     const ATTR_LOG_STEP     = 'logStep';
 
     /**
-     * @return EmailSendLogQuery
+     * @return TelegramSendLogQuery
      */
     public static function find()
     {
-        return new EmailSendLogQuery(get_called_class());
+        return new TelegramSendLogQuery(get_called_class());
     }
 
     /**
@@ -64,7 +64,7 @@ class EmailSendLog extends ActiveRecord
      */
     public static function collectionName()
     {
-        return 'emailSendLog';
+        return 'telegramSendLog';
     }
 
     /**
@@ -75,7 +75,7 @@ class EmailSendLog extends ActiveRecord
         return [
             static::ATTR_MONGO_ID,
             static::ATTR_USER_ID,
-            static::ATTR_EMAIL,
+            static::ATTR_TELEGRAM,
             static::ATTR_CREATED_AT,
             static::ATTR_SEND_AT,
             static::ATTR_OPEN_AT,
@@ -96,7 +96,7 @@ class EmailSendLog extends ActiveRecord
         return [
             static::ATTR_MONGO_ID     => 'ID',
             static::ATTR_USER_ID      => 'Пользователь',
-            static::ATTR_EMAIL        => 'Получатель',
+            static::ATTR_TELEGRAM     => 'Получатель',
             static::ATTR_CREATED_AT   => 'Дата старта',
             static::ATTR_SEND_AT      => 'Дата отправки',
             static::ATTR_OPEN_AT      => 'Дата открытия',
@@ -151,14 +151,15 @@ class EmailSendLog extends ActiveRecord
      * Если произошла ошибка сохранения лога, пользователь не найден или отписан возвращаем false
      * Тем самым останавливаем продолжение работы отправки пользователю
      *
-     * @param $email
+     * @param $telegramId
      * @param $templateKey
+     * @param $user
      * @return bool
      */
-    public static function start($email, $templateKey, $user)
+    public static function start($telegramId, $templateKey, $user)
     {
         $model = new self();
-        $model->email = $email;
+        $model->telegramId = $telegramId;
         $model->templateKey = $templateKey;
         $model->logStep = static::LOG_STEP_START;
 
@@ -168,7 +169,7 @@ class EmailSendLog extends ActiveRecord
         $model->isSend = false;
 
         if (!$template) {
-            $model->error = "Шаблон {$templateKey} для пользователя с почтой {$email} не найден";
+            $model->error = "Шаблон {$templateKey} для пользователя с telegramId {$telegramId} не найден";
             $model->theme = $templateKey;
             $model->save();
 
@@ -178,12 +179,12 @@ class EmailSendLog extends ActiveRecord
         $model->theme = $template->name;
 
         if (!$user) {
-            $model->error = "Пользователь с почтой {$email} не найден";
+            $model->error = "Пользователь с telegramId {$telegramId} не найден";
             $model->save();
 
             return false;
         }
-        
+
         $model->userId = $user->_id;
 
         if (!$model->save()) {
@@ -222,7 +223,7 @@ class EmailSendLog extends ActiveRecord
      */
     public static function open($logId, $ip)
     {
-        $log = EmailSendLog::findOne($logId);
+        $log = TelegramSendLog::findOne($logId);
         if ($log) {
             $log->touch(static::ATTR_OPEN_AT);
             $log->openIp = $ip;

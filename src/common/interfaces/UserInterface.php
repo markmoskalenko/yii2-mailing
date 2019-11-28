@@ -24,6 +24,11 @@ interface UserInterface
     public function getFirstName();
 
     /**
+     * @return string
+     */
+    public function getLanguage();
+
+    /**
      * @return mixed
      */
     public function getReferralByAffiliateDomain();
@@ -49,6 +54,12 @@ interface UserInterface
      * @return UserInterface
      */
     public static function findByEmail(string $email);
+
+    /**
+     * @param string $telegramId
+     * @return UserInterface
+     */
+    public static function findByTelegramId(string $telegramId);
 
     /**
      * @param string $code
