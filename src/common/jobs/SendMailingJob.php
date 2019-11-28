@@ -7,6 +7,7 @@ use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\templateEmail\TemplateEmail;
 use MongoDB\BSON\ObjectId;
+use Throwable;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\ErrorException;
