@@ -4,7 +4,6 @@ namespace markmoskalenko\mailing\common\interfaces;
 
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
-use yii\db\ActiveQueryInterface;
 
 interface UserInterface
 {
@@ -73,4 +72,8 @@ interface UserInterface
      */
     public static function findOneByReferralDomain(string $domain);
 
+    /**
+     * @return string
+     */
+    public function getAccessToken();
 }

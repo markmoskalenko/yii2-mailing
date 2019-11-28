@@ -30,14 +30,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 <h6 class="m-0">Список</h6>
 
                 <div class="actions">
-                    <a class="btn-floating-action" href="<?= Url::to(['create']) ?>" data-toggle="tooltip" data-placement="top" data-original-title="Add new">
+                    <a class="btn-floating-action" href="<?= Url::to(['create']) ?>" data-toggle="tooltip"
+                       data-placement="top" data-original-title="Add new">
                         <i class="fa fa-plus"></i>
                     </a>
                 </div>
             </div>
             <div class="card-body p-0 pb-3">
                 <?= GridView::widget([
-                    'layout' => "{items}\n{pager}",
+                    'layout'       => "{items}\n{pager}",
                     'dataProvider' => $dataProvider,
                     'pager'        => [
                         'linkContainerOptions'          => ['class' => 'page-item'],
@@ -54,11 +55,26 @@ $this->params['breadcrumbs'][] = $this->title;
                             }
                         ],
                         [
-                            'class'    => ActionColumn::class,
-                            'headerOptions'=>[
-                                    'width'=>'80px'
+                            'class'         => ActionColumn::class,
+                            'headerOptions' => [
+                                'width' => '80px'
                             ],
-                            'template' => '{view} {update} {delete}'
+                            'buttons'       => [
+                                'test' => function ($url, $model)
+                                {
+                                    $url = Url::to(['/mailing/template/test', 'key' => $model->key]);
+                                    $options = array_merge([
+                                        'title'      => 'Тестовая отправка',
+                                        'aria-label' => 'Тестовая отправка',
+                                        'data-pjax'  => '1',
+                                        'onclick'    => "$.get('".$url."'); return false;"
+                                    ]);
+                                    $icon = Html::tag('span', '', ['class' => 'far fa-paper-plane']);
+
+                                    return Html::a($icon, '', $options);
+                                }
+                            ],
+                            'template'      => '{test} {view} {update} {delete}'
                         ],
                     ],
                 ]); ?>

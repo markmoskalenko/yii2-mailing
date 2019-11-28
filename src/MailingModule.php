@@ -3,20 +3,19 @@
 namespace markmoskalenko\mailing;
 
 use markmoskalenko\mailing\common\interfaces\UserInterface;
-use markmoskalenko\mailing\common\jobs\SendMailiJob;
-use markmoskalenko\mailing\common\jobs\SendTelegramJob;
+use markmoskalenko\mailing\common\jobs\SendMailingJob;
 use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
-use markmoskalenko\mailing\common\models\telegramSendLog\TelegramSendLog;
-use Telegram\Bot\Api;
 use Yii;
 use yii\base\BootstrapInterface;
 use yii\base\InvalidConfigException;
+use yii\base\Module;
+use yii\console\Application;
 
 /**
  * Class MailingModule
  * @package mailing
  */
-class MailingModule extends \yii\base\Module implements BootstrapInterface
+class MailingModule extends Module implements BootstrapInterface
 {
     /**
      * Telegram token API
@@ -26,18 +25,18 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
     public $telegramTokenApi;
 
     /**
-     * Email отправителя
-     *
-     * @var string
-     */
-    public $senderEmail;
-
-    /**
      * Название Telegram отправителя
      *
      * @var string
      */
     public $senderTelegram;
+
+    /**
+     * Email отправителя
+     *
+     * @var string
+     */
+    public $senderEmail;
 
     /**
      * Имя отправителя
@@ -51,7 +50,7 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
      *
      * @var array
      */
-    private $_links;
+    public $links = [];
 
     /**
      * @var UserInterface
@@ -74,7 +73,7 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
      */
     public function bootstrap($app)
     {
-        if (Yii::$app instanceof \yii\console\Application) {
+        if (Yii::$app instanceof Application) {
             $this->initConsoleEnv();
         }
     }
@@ -88,30 +87,53 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
     }
 
     /**
-     * @param string $email
-     * @param string $key
-     * @param array  $data
-     * @param int    $delay
+     * @param string $email почта пользователя
+     * @param string $key   ключ email шаблона
+     * @param array  $data  дополнительные данные для шаблона
+     * @param int    $delay задержка отправки
      * @throws InvalidConfigException
      */
     public function send($email, $key, $data = [], $delay = 0)
     {
+        /**
+         * Пользователь
+         */
         $user = $this->userClass::findByEmail($email);
+
+        /**
+         * Лог отправки письма
+         */
         $logId = EmailSendLog::start($email, $key, $user);
 
         if ($logId !== false) {
             /** @var yii\queue\redis\Queue $queue */
             $queue = Yii::$app->get('queue');
-            $queue->delay($delay)->push(new SendMailiJob([
+
+            $queue->delay($delay)->push(new SendMailingJob([
+                // Ключ шаблона
                 'key'         => $key,
+                // Email пользователя
                 'email'       => $email,
+                // Данные для шаблона
                 'data'        => $data,
+                // ID лога
                 'logId'       => $logId,
+                // Почта отправитель
                 'senderEmail' => $this->senderEmail,
+                // Имя отправителя
                 'senderName'  => $this->senderName,
+                // Домен вайтлейбла
                 'ourDomain'   => $this->ourDomain,
-                'links'       => $this->_links,
+                // Базовые ссылки
+                // [api] => http://api.logtime.local
+                // [signIn] => {host}/auth/sign-in
+                // [payment] => {host}/payment
+                // [unsubscribe] => {host}/auth/unsubscribe
+                // [webApp] => app.{host}
+                'links'       => $this->links,
+                // ssl
                 'ssl'         => $this->ssl,
+                // Класс модели пользователя
                 'userClass'   => $this->userClass
             ]));
         } else {
@@ -119,55 +141,35 @@ class MailingModule extends \yii\base\Module implements BootstrapInterface
         }
     }
 
-    /**
-     * @param        $telegramId
-     * @param string $key
-     * @param array  $data
-     * @param int    $delay
-     */
-    public function sendTelegram($telegramId, $key, $data = [], $delay = 0)
-    {
-        $user = $this->userClass::findByTelegramId($telegramId);
-        $logId = TelegramSendLog::start($telegramId, $key, $user);
-
-        if ($logId !== false) {
-            /** @var yii\queue\redis\Queue $queue */
-            $queue = Yii::$app->get('queue');
-            $queue->delay($delay)->push(new SendTelegramJob([
-                'key'              => $key,
-                'telegramTokenApi' => $this->telegramTokenApi,
-                'telegramId'       => $telegramId,
-                'data'             => $data,
-                'logId'            => $logId,
-                'senderTelegram'   => $this->senderTelegram,
-                'senderName'       => $this->senderName,
-                'ourDomain'        => $this->ourDomain,
-                'links'            => $this->_links,
-                'ssl'              => $this->ssl,
-                'userClass'        => $this->userClass
-            ]));
-        } else {
-            //@todo сообщение в телеграм
-        }
-    }
-
-    /**
-     * @param array $links
-     * @throws InvalidConfigException on invalid argument.
-     */
-    public function setLinks($links)
-    {
-        if (!is_array($links) && !is_object($links)) {
-            throw new InvalidConfigException('"' . get_class($this) . '::transport" should be either object or array, "' . gettype($links) . '" given.');
-        }
-        $this->_links = $links;
-    }
-
-    /**
-     * @return array
-     */
-    public function getLinks()
-    {
-        return $this->_links;
-    }
+    //    /**
+    //     * @param        $telegramId
+    //     * @param string $key
+    //     * @param array  $data
+    //     * @param int    $delay
+    //     */
+    //    public function sendTelegram($telegramId, $key, $data = [], $delay = 0)
+    //    {
+    //        $user = $this->userClass::findByTelegramId($telegramId);
+    //        $logId = TelegramSendLog::start($telegramId, $key, $user);
+    //
+    //        if ($logId !== false) {
+    //            /** @var yii\queue\redis\Queue $queue */
+    //            $queue = Yii::$app->get('queue');
+    //            $queue->delay($delay)->push(new SendTelegramJob([
+    //                'key'              => $key,
+    //                'telegramTokenApi' => $this->telegramTokenApi,
+    //                'telegramId'       => $telegramId,
+    //                'data'             => $data,
+    //                'logId'            => $logId,
+    //                'senderTelegram'   => $this->senderTelegram,
+    //                'senderName'       => $this->senderName,
+    //                'ourDomain'        => $this->ourDomain,
+    //                'links'            => $this->_links,
+    //                'ssl'              => $this->ssl,
+    //                'userClass'        => $this->userClass
+    //            ]));
+    //        } else {
+    //            //@todo сообщение в телеграм
+    //        }
+    //    }
 }

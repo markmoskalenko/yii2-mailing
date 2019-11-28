@@ -4,6 +4,7 @@ namespace markmoskalenko\mailing\backend\controllers;
 
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\template\TemplateSearch;
+use markmoskalenko\mailing\MailingModule;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
@@ -62,8 +63,8 @@ class TemplateController extends Controller
         ]);
 
         return $this->render('view', [
-            'model'                 => $model,
-            'templateEmailProvider' => $templateEmailProvider,
+            'model'                    => $model,
+            'templateEmailProvider'    => $templateEmailProvider,
             'templateTelegramProvider' => $templateTelegramProvider,
         ]);
     }
@@ -100,6 +101,17 @@ class TemplateController extends Controller
         $model->delete();
 
         return $this->redirect(['/mailing/template/view', 'id' => (string)$model->_id]);
+    }
+
+    /**
+     * @param $key
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionTest($key)
+    {
+        /** @var MailingModule $mailing */
+        $mailing = Yii::$app->getModule('mailing');
+        $mailing->send('office@it-yes.com', $key, []);
     }
 
 
