@@ -104,12 +104,12 @@ class SendMailiJob extends BaseObject implements JobInterface
         $log = EmailSendLog::findOne($this->logId);
         $sender = [$this->senderEmail => $this->senderName];
 
-        try {
-            if (!$log) {
-                // в телеграм
-                throw new ErrorException('Лог не найден');
-            }
+        if (!$log) {
+            // в телеграм
+            throw new ErrorException('Лог не найден');
+        }
 
+        try {
 
             if (!$template) {
                 throw new ErrorException('Шаблон не найден ' . $this->key);
@@ -137,12 +137,8 @@ class SendMailiJob extends BaseObject implements JobInterface
             }
 
             $webAppLink = ArrayHelper::getValue($this->links, 'webApp');
-            $singInLink = ArrayHelper::getValue($this->links, 'signIn');
-            $paymentLink = ArrayHelper::getValue($this->links, 'payment');
             $unsubscribeLink = ArrayHelper::getValue($this->links, 'unsubscribe');
-
             $unsubscribeLink .= "?email={$this->user->getEmail()}";
-
             $scheme = $this->ssl ? 'https://' : 'http://';
 
             // Корневая ссылка на app.
@@ -176,10 +172,6 @@ class SendMailiJob extends BaseObject implements JobInterface
                 $mailer = Yii::$app->mailer;
             }
 
-            // Ссылка на регистрацию
-            $singInLink = str_replace('{host}', $webAppLink, $singInLink);
-            // Ссылка на оплату
-            $paymentLink = str_replace('{host}', $webAppLink, $paymentLink);
             // Ссылка отписаться от рассылок
             $unsubscribeLink = str_replace('{host}', $webAppLink, $unsubscribeLink);
 
@@ -196,12 +188,6 @@ class SendMailiJob extends BaseObject implements JobInterface
 
             // Ссылка на проект
             $body = str_replace('{webAppLink}', $webAppLink, $body);
-
-            // Ссылка на авторизацию
-            $body = str_replace('{singInLink}', $singInLink, $body);
-
-            // Ссылка на оплату
-            $body = str_replace('{paymentLink}', $paymentLink, $body);
 
             // Почта
             $body = str_replace('{email}', $this->user->getEmail(), $body);
@@ -253,6 +239,8 @@ class SendMailiJob extends BaseObject implements JobInterface
             $message .= '<br>' . $e->getMessage();
 
             $message .= '<br>' . $e->getTraceAsString();
+
+            echo $message . PHP_EOL;
 
             $log->setError($message);
 

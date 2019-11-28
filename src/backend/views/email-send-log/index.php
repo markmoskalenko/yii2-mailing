@@ -67,10 +67,6 @@ $this->params['breadcrumbs'][] = $this->title;
                             'format'    => 'raw',
                             'attribute' => EmailSendLog::ATTR_ERROR,
                         ],
-                        [
-                            'class'    => ActionColumn::class,
-                            'template' => '{view} {update} {delete}'
-                        ],
                     ],
                 ]); ?>
             </div>

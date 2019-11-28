@@ -5,13 +5,15 @@ use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
 
-$this->title = 'Добавить';
-$this->params['breadcrumbs'][] = ['label' => 'Письма', 'url' => ['/mailing/template/index']];
-$this->params['breadcrumbs'][] = $this->title;
+$this->title = 'Добавить новый шаблон';
 ?>
-<div class="tariff-create">
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?= $this->render('_form', [
-        'model' => $model,
-    ]) ?>
+<div class="page-header row no-gutters py-4">
+    <div class="col-12  text-sm-left mb-0">
+        <h3 class="page-title"><?= Html::encode($this->title) ?></h3>
+    </div>
 </div>
+
+<?= $this->render('_form', [
+    'model' => $model,
+]) ?>
+
