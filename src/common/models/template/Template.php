@@ -3,15 +3,18 @@
 namespace markmoskalenko\mailing\common\models\template;
 
 use markmoskalenko\mailing\common\models\ActiveRecord;
+use markmoskalenko\mailing\common\models\templateEmail\TemplateEmail;
 use MongoDB\BSON\ObjectId;
 
 /**
  * Шаблоны для писем
  *
- * @property ObjectId $_id
- * @property string   $name
- * @property integer  $priority
- * @property string   $key
+ * @property ObjectId        $_id
+ * @property string          $name
+ * @property integer         $priority
+ * @property string          $key
+ *
+ * @property TemplateEmail[] $templateEmail
  */
 class Template extends ActiveRecord
 {
@@ -91,5 +94,24 @@ class Template extends ActiveRecord
     {
         return [
         ];
+    }
+
+    /**
+     * Копирование объекта
+     */
+    public function copy()
+    {
+        $newModel = new Template();
+        $newModel->setAttributes($this->getAttributes());
+        $newModel->name = $newModel->name . '(Копия)';
+        $newModel->key = md5(time());
+        $newModel->save();
+
+        foreach ($this->templateEmail as $item) {
+            $newModelTemplateEmail = new TemplateEmail();
+            $newModelTemplateEmail->setAttributes($item->getAttributes());
+            $newModelTemplateEmail->templateId = new ObjectId($newModel->_id);
+            $newModelTemplateEmail->save();
+        }
     }
 }

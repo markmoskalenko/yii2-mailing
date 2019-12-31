@@ -72,9 +72,20 @@ $this->params['breadcrumbs'][] = $this->title;
                                     $icon = Html::tag('span', '', ['class' => 'far fa-paper-plane']);
 
                                     return Html::a($icon, '', $options);
-                                }
+                                },
+                                'copy' => function ($url, $model) {
+                                    $url = ['/mailing/template/copy', 'id' => (string)$model->_id];
+                                    $title = 'Дублировать письмо';
+                                    $icon = Html::tag('span', '', ['class' => 'far fa-copy']);
+                                    $options = array_merge([
+                                        'title'      => $title,
+                                        'aria-label' => $title,
+                                        'data-pjax'  => '0',
+                                    ]);
+                                    return Html::a($icon, $url, $options);
+                                },
                             ],
-                            'template'      => '{test} {view} {update} {delete}'
+                            'template'      => '{test} {copy} {view} {update} {delete}'
                         ],
                     ],
                 ]); ?>

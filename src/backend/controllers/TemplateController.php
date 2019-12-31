@@ -114,6 +114,14 @@ class TemplateController extends Controller
         $mailing->send('office@it-yes.com', $key, []);
     }
 
+    public function actionCopy($id)
+    {
+        $model = $this->findModel($id);
+        $model->copy();
+
+        return $this->redirect(['/mailing/template/index']);
+    }
+
 
     /**
      * @param $id
