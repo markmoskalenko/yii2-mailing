@@ -1,10 +1,10 @@
 <?php
 
-use markmoskalenko\mailing\common\models\templateEmail\TemplateEmail;
+use markmoskalenko\mailing\common\models\templatePush\TemplatePush;
 use yii\bootstrap4\Html;
 
 /* @var yii\web\View $this */
-/* @var TemplateEmail $model */
+/* @var TemplatePush $model */
 
 $this->title = 'Редактировать шаблон';
 ?>

@@ -12,21 +12,21 @@ use mongosoft\mongodb\MongoDateBehavior;
 /**
  * Шаблоны для писем
  *
- * @property string      $_id
- * @property ObjectId    $userId
- * @property string      $email
- * @property string      $theme
- * @property UTCDateTime $createdAt
- * @property UTCDateTime $sendAt
- * @property UTCDateTime $openAt
- * @property boolean     $isSend
- * @property string      $error
- * @property string      $openIp
- * @property string      $templateKey
- * @property string      $logStep
+ * @property string        $_id
+ * @property ObjectId      $userId
+ * @property string        $email
+ * @property string        $theme
+ * @property UTCDateTime   $createdAt
+ * @property UTCDateTime   $sendAt
+ * @property UTCDateTime   $openAt
+ * @property boolean       $isSend
+ * @property string        $error
+ * @property string        $openIp
+ * @property string        $templateKey
+ * @property string        $logStep
  *
  * @property UserInterface $user
- * 
+ *
  * @mixin MongoDateBehavior
  */
 class EmailSendLog extends ActiveRecord
@@ -151,8 +151,9 @@ class EmailSendLog extends ActiveRecord
      * Если произошла ошибка сохранения лога, пользователь не найден или отписан возвращаем false
      * Тем самым останавливаем продолжение работы отправки пользователю
      *
-     * @param $email
-     * @param $templateKey
+     * @param string        $email
+     * @param string        $templateKey
+     * @param UserInterface $user
      * @return bool
      */
     public static function start($email, $templateKey, $user)
@@ -183,8 +184,8 @@ class EmailSendLog extends ActiveRecord
 
             return false;
         }
-        
-        $model->userId = $user->_id;
+
+        $model->userId = $user->getId();
 
         if (!$model->save()) {
             return false;

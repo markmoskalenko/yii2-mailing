@@ -73,6 +73,17 @@ interface UserInterface
     public static function findOneByReferralDomain(string $domain);
 
     /**
+     * @param string $id
+     * @return mixed
+     */
+    public static function findOneById(string $id);
+
+    /**
+     * @return string
+     */
+    public function getFirebaseToken();
+
+    /**
      * @return string
      */
     public function getAccessToken();

@@ -13,7 +13,7 @@ use yii\grid\GridView;
 $this->title = 'Лог отправки писем на почту';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="page-header row no-gutters py-4">
+<div class="page-header row no-gutters">
     <div class="col-12 text-center text-sm-left mb-0">
         <span class="text-uppercase page-subtitle">Список писем которые мы отправляем пользователям</span>
         <h3 class="page-title"><?= $this->title ?></h3>
