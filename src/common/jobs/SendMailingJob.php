@@ -137,6 +137,10 @@ class SendMailingJob extends BaseObject implements JobInterface
             // Если нету партнера тогда ставим наш домен
             $sourceDomain = $referral ? $referral->affiliateDomain : $this->ourDomain;
 
+            if ($sourceDomain == 'logtime.local') {
+                $sourceDomain = 'logtime.ru';
+            }
+
             // Шаблон письма для отправки
             // Ищет по ключу, языку и домены партнера
             $templateEmail = TemplateEmail::findByKeyAndLangAndAffiliateDomain(
