@@ -4,17 +4,21 @@ namespace markmoskalenko\mailing\common\models\template;
 
 use markmoskalenko\mailing\common\models\ActiveRecord;
 use markmoskalenko\mailing\common\models\templateEmail\TemplateEmail;
+use markmoskalenko\mailing\common\models\templatePush\TemplatePush;
+use markmoskalenko\mailing\common\models\templateTelegram\TemplateTelegram;
 use MongoDB\BSON\ObjectId;
 
 /**
  * Шаблоны для писем
  *
- * @property ObjectId        $_id
- * @property string          $name
- * @property integer         $priority
- * @property string          $key
+ * @property ObjectId           $_id
+ * @property string             $name
+ * @property integer            $priority
+ * @property string             $key
  *
- * @property TemplateEmail[] $templateEmail
+ * @property TemplateEmail[]    $templateEmail
+ * @property TemplatePush[]     $templatePush
+ * @property TemplateTelegram[] $templateTelegram
  */
 class Template extends ActiveRecord
 {
@@ -65,9 +69,9 @@ class Template extends ActiveRecord
     {
         return [
             static::ATTR_MONGO_ID => 'ID',
-            static::ATTR_NAME     => 'Название',
+            static::ATTR_NAME => 'Название',
             static::ATTR_PRIORITY => 'Приоритет',
-            static::ATTR_KEY      => 'Ключ',
+            static::ATTR_KEY => 'Ключ',
         ];
     }
 

@@ -1,6 +1,5 @@
 <?php
 
-use common\models\questionOfDay\QuestionOfDay;
 use markmoskalenko\mailing\backend\grid\ActionColumn;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\template\TemplateSearch;
@@ -13,7 +12,6 @@ use yii\helpers\Url;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Письма';
-$this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <div class="page-header row no-gutters">
@@ -38,54 +36,79 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="card-body p-0 pb-3">
                 <?= GridView::widget([
-                    'layout'       => "{items}\n{pager}",
+                    'layout' => "{items}\n{pager}",
                     'dataProvider' => $dataProvider,
-                    'pager'        => [
-                        'linkContainerOptions'          => ['class' => 'page-item'],
-                        'linkOptions'                   => ['class' => 'page-link'],
+                    'pager' => [
+                        'linkContainerOptions' => ['class' => 'page-item'],
+                        'linkOptions' => ['class' => 'page-link'],
                         'disabledListItemSubTagOptions' => ['tag' => 'a', 'class' => 'page-link']
                     ],
-                    'columns'      => [
+                    'columns' => [
                         [
                             'attribute' => Template::ATTR_NAME,
-                            'format'    => 'raw',
-                            'value'     => function (Template $model)
+                            'format' => 'raw',
+                            'value' => function (Template $model)
                             {
                                 return Html::a($model->name, ['view', 'id' => (string)$model->_id]);
                             }
                         ],
                         [
-                            'class'         => ActionColumn::class,
+                            'header' => 'Цели',
                             'headerOptions' => [
-                                'width' => '80px'
+                                'width' => '150px'
                             ],
-                            'buttons'       => [
+                            'value' => function (Template $model)
+                            {
+                                $result = [];
+
+                                if ($model->templateEmail) {
+                                    $result[] = 'Email';
+                                }
+                                if ($model->templatePush) {
+                                    $result[] = 'Push';
+                                }
+
+                                if ($model->templateTelegram) {
+                                    $result[] = 'Telegram';
+                                }
+
+                                return implode(', ', $result);
+                            }
+                        ],
+                        [
+                            'class' => ActionColumn::class,
+                            'headerOptions' => [
+                                'width' => '100px'
+                            ],
+                            'buttons' => [
                                 'test' => function ($url, $model)
                                 {
                                     $url = Url::to(['/mailing/template/test', 'key' => $model->key]);
                                     $options = array_merge([
-                                        'title'      => 'Тестовая отправка',
+                                        'title' => 'Тестовая отправка',
                                         'aria-label' => 'Тестовая отправка',
-                                        'data-pjax'  => '1',
-                                        'onclick'    => "$.get('".$url."'); return false;"
+                                        'data-pjax' => '1',
+                                        'onclick' => "$.get('" . $url . "'); return false;"
                                     ]);
                                     $icon = Html::tag('span', '', ['class' => 'far fa-paper-plane']);
 
                                     return Html::a($icon, '', $options);
                                 },
-                                'copy' => function ($url, $model) {
+                                'copy' => function ($url, $model)
+                                {
                                     $url = ['/mailing/template/copy', 'id' => (string)$model->_id];
                                     $title = 'Дублировать письмо';
                                     $icon = Html::tag('span', '', ['class' => 'far fa-copy']);
                                     $options = array_merge([
-                                        'title'      => $title,
+                                        'title' => $title,
                                         'aria-label' => $title,
-                                        'data-pjax'  => '0',
+                                        'data-pjax' => '0',
                                     ]);
+
                                     return Html::a($icon, $url, $options);
                                 },
                             ],
-                            'template'      => '{test} {copy} {view} {update} {delete}'
+                            'template' => '{test} {copy} {view} {update} {delete}'
                         ],
                     ],
                 ]); ?>

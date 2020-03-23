@@ -2,6 +2,7 @@
 
 namespace markmoskalenko\mailing\common\jobs;
 
+use markmoskalenko\mailing\common\helpers\LinksHelpers;
 use markmoskalenko\mailing\common\interfaces\UserInterface;
 use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
 use markmoskalenko\mailing\common\models\template\Template;
@@ -11,7 +12,6 @@ use Throwable;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\ErrorException;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\queue\JobInterface;
 use yii\queue\Queue;
@@ -115,12 +115,11 @@ class SendMailingJob extends BaseObject implements JobInterface
         // Отправитель
         $sender = [$this->senderEmail => $this->senderName];
 
-        if (!$log) {
-            // в телеграм
-            throw new ErrorException('Лог не найден');
-        }
-
         try {
+            if (!$log) {
+                throw new ErrorException('Лог не найден');
+            }
+
             if (!$template) {
                 throw new ErrorException('Шаблон не найден ' . $this->key);
             }
@@ -129,92 +128,32 @@ class SendMailingJob extends BaseObject implements JobInterface
                 throw new ErrorException('Пользователь не найден ' . $this->email);
             }
 
+
             // Поиск основного партнера по реферальному домену
             // @todo переименовать в affiliate
             $referral = $this->user->getReferralByAffiliateDomain()->one();
 
-            // Домен на который будут перенаправлять все письма
-            // Если нету партнера тогда ставим наш домен
-            $sourceDomain = $referral ? $referral->affiliateDomain : $this->ourDomain;
-
-            if ($sourceDomain == 'logtime.local') {
-                $sourceDomain = 'logtime.ru';
-            }
+            $data = LinksHelpers::getLinks(
+                $this->user,
+                $referral,
+                $this->ssl,
+                $this->links,
+                $this->ourDomain,
+                $this->logId,
+                $this->data
+            );
 
             // Шаблон письма для отправки
             // Ищет по ключу, языку и домены партнера
             $templateEmail = TemplateEmail::findByKeyAndLangAndAffiliateDomain(
                 $template->_id,
                 $this->user->getLanguage(),
-                $sourceDomain
+                $data['{sourceDomain}']
             );
 
             if (!$templateEmail) {
-                throw new ErrorException('Шаблон не найден ' . $this->key . ':' . $sourceDomain);
+                throw new ErrorException('Шаблон не найден ' . $this->key . ':' . $data['{sourceDomain}']);
             }
-
-            // Защищенный протокол или нет
-            $scheme = $this->ssl ? 'https://' : 'http://';
-
-            // Api хост
-            $apiEndpoint = ArrayHelper::getValue($this->links, 'api');
-
-            // Ссылка на приложение app.{host}.ru
-            $webAppLink = ArrayHelper::getValue($this->links, 'webApp');
-
-            // Заменяем плейсхолдер {host} на домен партнера или наш
-            $webAppLink = $scheme . str_replace('{host}', $sourceDomain, $webAppLink);
-
-            // Ссылка для отписки
-            $unsubscribeLink = ArrayHelper::getValue($this->links, 'unsubscribe');
-            $unsubscribeLink .= "?email={$this->user->getEmail()}";
-            $unsubscribeLink = str_replace('{host}', $webAppLink, $unsubscribeLink);
-
-            // Имя пользователя
-            $firstName = $this->user->getFirstName();
-
-            // Почта
-            $email = $this->user->getEmail();
-
-            $signUpAt = $this->user->getCreatedAt()->toDateTime()->format('d.m.Y');
-
-            $expiredAt = $this->user->getExpiredAt()->toDateTime()->format('d.m.Y');
-            $currentYear = date('Y');
-
-            $pixelUrl = "{$apiEndpoint}/mailing/pixel/open/{$this->logId}.png";
-
-
-            $authUrl = ArrayHelper::getValue($this->links, 'signIn');
-            $authUrl = str_replace('{host}', $webAppLink, $authUrl);
-            $authUrl .= "?token={$this->user->getAccessToken()}";
-
-
-            $paymentLink = $authUrl . '&redirect=/payment';
-            $affiliateLink = $authUrl . '&redirect=/affiliate/balance';
-            $buttonLink = $authUrl . '&redirect=/calendar';
-
-
-            // Подставляем домен в переданные переменные
-            foreach ((array)$this->data as $key => $value) {
-                $this->data[$key] = str_replace('{host}', $webAppLink, $value);
-            }
-
-            $baseData = [
-                '{userId}'          => (string)$this->user->getId(),
-                '{webAppLink}'      => $webAppLink,
-                '{unsubscribeLink}' => $unsubscribeLink,
-                '{firstName}'       => $firstName,
-                '{email}'           => $email,
-                '{signUpAt}'        => $signUpAt,
-                '{expiredAt}'       => $expiredAt,
-                '{currentYear}'     => $currentYear,
-                '{pixelUrl}'        => $pixelUrl,
-                '{paymentLink}'     => $paymentLink,
-                '{affiliateLink}'   => $affiliateLink,
-                '{buttonLink}'      => $buttonLink,
-            ];
-
-            $data = array_merge($baseData, $this->data);
 
             if ($referral
                 && $referral->affiliateSmtpSenderEmail
@@ -227,15 +166,15 @@ class SendMailingJob extends BaseObject implements JobInterface
 
                 /** @var Mailer $mailer */
                 $mailer = Yii::createObject([
-                    'class'     => Mailer::class,
-                    'viewPath'  => '@common/mail',
+                    'class' => Mailer::class,
+                    'viewPath' => '@common/mail',
                     'transport' => [
-                        'class'      => 'Swift_SmtpTransport',
-                        'host'       => $referral->affiliateSmtpHost,
+                        'class' => 'Swift_SmtpTransport',
+                        'host' => $referral->affiliateSmtpHost,
                         'encryption' => $referral->affiliateSmtpEncryption,
-                        'username'   => $referral->affiliateSmtpUsername,
-                        'password'   => $referral->affiliateSmtpPassword,
-                        'port'       => $referral->affiliateSmtpPort,
+                        'username' => $referral->affiliateSmtpUsername,
+                        'password' => $referral->affiliateSmtpPassword,
+                        'port' => $referral->affiliateSmtpPort,
                     ],
                 ]);
 
@@ -244,6 +183,7 @@ class SendMailingJob extends BaseObject implements JobInterface
                 $mailer = Yii::$app->mailer;
             }
 
+            $apiEndpoint = $data['{apiEndpoint}'];
             $body = $templateEmail->body;
             $body = str_replace('src="/images', 'src="' . $apiEndpoint . '/images', $body);
             $body = str_replace('src=\'/images', 'src=\'' . $apiEndpoint . '/images', $body);
@@ -252,7 +192,7 @@ class SendMailingJob extends BaseObject implements JobInterface
             $body = str_replace('url(/images', 'url(' . $apiEndpoint . '/images', $body);
 
             // Пиксель для проверки открытия письма
-            $body .= Html::img($pixelUrl, [
+            $body .= Html::img($data['{pixelUrl}'], [
                 'style' => 'positions: absolute; left: -99999px;bottom:-99999px; width:0px; height: 0px;'
             ]);
 
@@ -276,13 +216,8 @@ class SendMailingJob extends BaseObject implements JobInterface
         } catch (Throwable $e) {
             $message = '[Отправитель]: ' . print_r($sender, true);
             $message .= '<br>' . $e->getMessage();
-
             $message .= '<br>' . $e->getTraceAsString();
-
-            echo $message . PHP_EOL;
-
             $log->setError($message);
-
             throw new $e;
         }
     }

@@ -85,7 +85,6 @@ class SendPushJob extends BaseObject implements JobInterface
 
         if (!$fireBaseToken) {
             $log->setError('Нет Firebase токена');
-
         } else {
             try {
                 // Сообщение для отправки
@@ -118,9 +117,8 @@ class SendPushJob extends BaseObject implements JobInterface
 
                 $message = CloudMessage::withTarget('token', $fireBaseToken)
                     ->withNotification(Notification::create($templatePush->title, $body));
-                //                    ->withData(['key' => 'value']);
 
-                $factory = (new Factory())
+                (new Factory())
                     ->withServiceAccount($this->firebaseToken)
                     ->createMessaging()
                     ->send($message);

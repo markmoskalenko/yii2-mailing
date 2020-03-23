@@ -67,10 +67,10 @@ class TemplateController extends Controller
         ]);
 
         return $this->render('view', [
-            'model'                    => $model,
-            'templateEmailProvider'    => $templateEmailProvider,
+            'model' => $model,
+            'templateEmailProvider' => $templateEmailProvider,
             'templateTelegramProvider' => $templateTelegramProvider,
-            'templatePushProvider'     => $templatePushProvider,
+            'templatePushProvider' => $templatePushProvider,
         ]);
     }
 
@@ -116,7 +116,10 @@ class TemplateController extends Controller
     {
         /** @var MailingModule $mailing */
         $mailing = Yii::$app->getModule('mailing');
-        $mailing->send('office@it-yes.com', $key, []);
+        $user = $mailing->userClass::findByEmail('office@it-yes.com');
+        $mailing->send($user->getEmail(), $key, []);
+        $mailing->sendPush($user->getId(), $key, []);
+        $mailing->sendTelegram($user->getId(), $key, []);
     }
 
     public function actionCopy($id)

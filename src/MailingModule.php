@@ -5,6 +5,7 @@ namespace markmoskalenko\mailing;
 use markmoskalenko\mailing\common\interfaces\UserInterface;
 use markmoskalenko\mailing\common\jobs\SendMailingJob;
 use markmoskalenko\mailing\common\jobs\SendPushJob;
+use markmoskalenko\mailing\common\jobs\SendTelegramJob;
 use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
 use Yii;
 use yii\base\BootstrapInterface;
@@ -24,13 +25,6 @@ class MailingModule extends Module implements BootstrapInterface
      * @var string
      */
     public $telegramTokenApi;
-
-    /**
-     * Название Telegram отправителя
-     *
-     * @var string
-     */
-    public $senderTelegram;
 
     /**
      * Firebase token
@@ -118,30 +112,30 @@ class MailingModule extends Module implements BootstrapInterface
 
         $queue->delay($delay)->push(new SendMailingJob([
             // Ключ шаблона
-            'key'         => $key,
+            'key' => $key,
             // Email пользователя
-            'email'       => $email,
+            'email' => $email,
             // Данные для шаблона
-            'data'        => $data,
+            'data' => $data,
             // ID лога
-            'logId'       => $logId,
+            'logId' => $logId,
             // Почта отправитель
             'senderEmail' => $this->senderEmail,
             // Имя отправителя
-            'senderName'  => $this->senderName,
+            'senderName' => $this->senderName,
             // Домен вайтлейбла
-            'ourDomain'   => $this->ourDomain,
+            'ourDomain' => $this->ourDomain,
             // Базовые ссылки
             // [api] => http://api.logtime.local
             // [signIn] => {host}/auth/sign-in
             // [payment] => {host}/payment
             // [unsubscribe] => {host}/auth/unsubscribe
             // [webApp] => app.{host}
-            'links'       => $this->links,
+            'links' => $this->links,
             // ssl
-            'ssl'         => $this->ssl,
+            'ssl' => $this->ssl,
             // Класс модели пользователя
-            'userClass'   => $this->userClass
+            'userClass' => $this->userClass
         ]));
     }
 
@@ -165,49 +159,60 @@ class MailingModule extends Module implements BootstrapInterface
 
         $queue->delay($delay)->push(new SendPushJob([
             // Ключ шаблона
-            'key'           => $key,
+            'key' => $key,
             // Email пользователя
-            'userId'        => $userId,
+            'userId' => $userId,
             // Данные для шаблона
-            'data'          => $data,
+            'data' => $data,
             // ID лога
-            'logId'         => $logId,
+            'logId' => $logId,
             // Класс модели пользователя
-            'userClass'     => $this->userClass,
+            'userClass' => $this->userClass,
             // Токен авторизации firebase
             'firebaseToken' => $this->firebaseToken
         ]));
     }
 
-    //    /**
-    //     * @param        $telegramId
-    //     * @param string $key
-    //     * @param array  $data
-    //     * @param int    $delay
-    //     */
-    //    public function sendTelegram($telegramId, $key, $data = [], $delay = 0)
-    //    {
-    //        $user = $this->userClass::findByTelegramId($telegramId);
-    //        $logId = TelegramSendLog::start($telegramId, $key, $user);
-    //
-    //        if ($logId !== false) {
-    //            /** @var yii\queue\redis\Queue $queue */
-    //            $queue = Yii::$app->get('queue');
-    //            $queue->delay($delay)->push(new SendTelegramJob([
-    //                'key'              => $key,
-    //                'telegramTokenApi' => $this->telegramTokenApi,
-    //                'telegramId'       => $telegramId,
-    //                'data'             => $data,
-    //                'logId'            => $logId,
-    //                'senderTelegram'   => $this->senderTelegram,
-    //                'senderName'       => $this->senderName,
-    //                'ourDomain'        => $this->ourDomain,
-    //                'links'            => $this->_links,
-    //                'ssl'              => $this->ssl,
-    //                'userClass'        => $this->userClass
-    //            ]));
-    //        } else {
-    //            //@todo сообщение в телеграм
-    //        }
-    //    }
+    /**
+     * @param        $userId
+     * @param string $key
+     * @param array  $data
+     * @param int    $delay
+     * @throws InvalidConfigException
+     */
+    public function sendTelegram($userId, $key, $data = [], $delay = 0)
+    {
+        /** @var UserInterface $user пользователь */
+        $user = $this->userClass::findOneById($userId);
+
+        /** @var EmailSendLog $logId логер отправки */
+        $logId = EmailSendLog::start($userId, $key, $user);
+
+        /** @var yii\queue\redis\Queue $queue */
+        $queue = Yii::$app->get('queue');
+        $queue->delay($delay)->push(new SendTelegramJob([
+            // Ключ шаблона
+            'key' => $key,
+            // Данные для шаблона
+            'data' => $data,
+            // ID лога
+            'logId' => $logId,
+            // Домен вайтлейбла
+            'ourDomain' => $this->ourDomain,
+            // Базовые ссылки
+            // [api] => http://api.logtime.local
+            // [signIn] => {host}/auth/sign-in
+            // [payment] => {host}/payment
+            // [unsubscribe] => {host}/auth/unsubscribe
+            // [webApp] => app.{host}
+            'links' => $this->links,
+            // ssl
+            'ssl' => $this->ssl,
+            // Класс модели пользователя
+            'userClass' => $this->userClass,
+            // Апи токен бота
+            'telegramTokenApi' => $this->telegramTokenApi,
+            'userId' => $userId,
+        ]));
+    }
 }

@@ -13,6 +13,11 @@ interface UserInterface
     public function getId();
 
     /**
+     * @return ObjectId
+     */
+    public function getTelegramId();
+
+    /**
      * @return string
      */
     public function getEmail();

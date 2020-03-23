@@ -7,16 +7,13 @@ use yii\bootstrap4\Html;
 /* @var TemplateTelegram $model */
 
 $this->title = 'Редактировать шаблон';
-$this->params['breadcrumbs'][] = ['label' => 'Письма', 'url' => ['/mailing/template/index']];
-$this->params['breadcrumbs'][] = ['label' => $model->template->name, 'url' => ['/mailing/template/index']];
-$this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="tariff-update">
+    <div class="page-header row no-gutters">
+        <div class="col-12  text-sm-left mb-0">
+            <h3 class="page-title"><?= Html::encode($this->title) ?></h3>
+        </div>
+    </div>
 
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <?= $this->render('_form', [
-        'model' => $model,
-    ]) ?>
-
-</div>
+<?= $this->render('_form', [
+    'model' => $model,
+]) ?>

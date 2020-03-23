@@ -40,7 +40,10 @@ class TemplateSearch extends Template
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'  => ['defaultOrder' => [Template::ATTR_NAME => SORT_ASC]]
+            'sort' => ['defaultOrder' => [Template::ATTR_NAME => SORT_ASC]],
+            'pagination' => [
+                'defaultPageSize' => 50
+            ]
         ]);
 
         $this->load($params);
@@ -58,6 +61,9 @@ class TemplateSearch extends Template
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => [
+                'defaultPageSize' => 50
+            ]
         ]);
 
         $this->load($params);
