@@ -88,7 +88,7 @@ $this->title = 'Письма';
                                         'title' => 'Тестовая отправка',
                                         'aria-label' => 'Тестовая отправка',
                                         'data-pjax' => '1',
-                                        'onclick' => "$.get('" . $url . "'); return false;"
+                                        'onclick' => "$.get('" . $url . "'); return false;",
                                     ]);
                                     $icon = Html::tag('span', '', ['class' => 'far fa-paper-plane']);
 
@@ -103,6 +103,7 @@ $this->title = 'Письма';
                                         'title' => $title,
                                         'aria-label' => $title,
                                         'data-pjax' => '0',
+                                        'data-confirm' => 'Дублировать письмо?'
                                     ]);
 
                                     return Html::a($icon, $url, $options);

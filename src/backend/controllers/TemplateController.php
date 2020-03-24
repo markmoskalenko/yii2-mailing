@@ -105,7 +105,7 @@ class TemplateController extends Controller
         $model = $this->findModel($id);
         $model->delete();
 
-        return $this->redirect(['/mailing/template/view', 'id' => (string)$model->_id]);
+        return $this->redirect(['/mailing/template/index']);
     }
 
     /**
@@ -117,6 +117,16 @@ class TemplateController extends Controller
         /** @var MailingModule $mailing */
         $mailing = Yii::$app->getModule('mailing');
         $user = $mailing->userClass::findByEmail('office@it-yes.com');
+        $mailing->send($user->getEmail(), $key, []);
+        $mailing->sendPush($user->getId(), $key, []);
+        $mailing->sendTelegram($user->getId(), $key, []);
+
+        $user = $mailing->userClass::findByEmail('feelsmax@gmail.com');
+        $mailing->send($user->getEmail(), $key, []);
+        $mailing->sendPush($user->getId(), $key, []);
+        $mailing->sendTelegram($user->getId(), $key, []);
+
+        $user = $mailing->userClass::findByEmail('bpxmsg@gmail.com');
         $mailing->send($user->getEmail(), $key, []);
         $mailing->sendPush($user->getId(), $key, []);
         $mailing->sendTelegram($user->getId(), $key, []);

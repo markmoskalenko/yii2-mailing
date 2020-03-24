@@ -68,6 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'title' => $title,
                                         'aria-label' => $title,
                                         'data-pjax' => '0',
+                                        'data-confirm' => 'Дублировать сообщение?'
                                     ]);
 
                                     return Html::a($icon, $url, $options);
@@ -121,6 +122,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'title' => $title,
                                         'aria-label' => $title,
                                         'data-pjax' => '0',
+                                        'data-confirm' => 'Дублировать сообщение?'
                                     ]);
 
                                     return Html::a($icon, $url, $options);
@@ -181,6 +183,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'title' => $title,
                                         'aria-label' => $title,
                                         'data-pjax' => '0',
+                                        'data-confirm' => 'Дублировать сообщение?'
                                     ]);
 
                                     return Html::a($icon, $url, $options);
