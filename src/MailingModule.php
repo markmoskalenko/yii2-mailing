@@ -95,7 +95,7 @@ class MailingModule extends Module implements BootstrapInterface
      * @param int    $delay задержка отправки
      * @throws InvalidConfigException
      */
-    public function send($email, $key, $data = [], $delay = 0)
+    public function send($email, $key, $data = [], $delay = 0, $priority = 3)
     {
         /**
          * Пользователь
@@ -110,33 +110,36 @@ class MailingModule extends Module implements BootstrapInterface
         /** @var yii\queue\redis\Queue $queue */
         $queue = Yii::$app->get('queue');
 
-        $queue->delay($delay)->push(new SendMailingJob([
-            // Ключ шаблона
-            'key' => $key,
-            // Email пользователя
-            'email' => $email,
-            // Данные для шаблона
-            'data' => $data,
-            // ID лога
-            'logId' => $logId,
-            // Почта отправитель
-            'senderEmail' => $this->senderEmail,
-            // Имя отправителя
-            'senderName' => $this->senderName,
-            // Домен вайтлейбла
-            'ourDomain' => $this->ourDomain,
-            // Базовые ссылки
-            // [api] => http://api.logtime.local
-            // [signIn] => {host}/auth/sign-in
-            // [payment] => {host}/payment
-            // [unsubscribe] => {host}/auth/unsubscribe
-            // [webApp] => app.{host}
-            'links' => $this->links,
-            // ssl
-            'ssl' => $this->ssl,
-            // Класс модели пользователя
-            'userClass' => $this->userClass
-        ]));
+        $queue
+            ->delay($delay)
+            ->priority($priority)
+            ->push(new SendMailingJob([
+                // Ключ шаблона
+                'key' => $key,
+                // Email пользователя
+                'email' => $email,
+                // Данные для шаблона
+                'data' => $data,
+                // ID лога
+                'logId' => $logId,
+                // Почта отправитель
+                'senderEmail' => $this->senderEmail,
+                // Имя отправителя
+                'senderName' => $this->senderName,
+                // Домен вайтлейбла
+                'ourDomain' => $this->ourDomain,
+                // Базовые ссылки
+                // [api] => http://api.logtime.local
+                // [signIn] => {host}/auth/sign-in
+                // [payment] => {host}/payment
+                // [unsubscribe] => {host}/auth/unsubscribe
+                // [webApp] => app.{host}
+                'links' => $this->links,
+                // ssl
+                'ssl' => $this->ssl,
+                // Класс модели пользователя
+                'userClass' => $this->userClass
+            ]));
     }
 
     /**
@@ -146,7 +149,7 @@ class MailingModule extends Module implements BootstrapInterface
      * @param int    $delay задержка отправки
      * @throws InvalidConfigException
      */
-    public function sendPush($userId, $key, $data = [], $delay = 0)
+    public function sendPush($userId, $key, $data = [], $delay = 0, $priority = 3)
     {
         /** @var UserInterface $user пользователь */
         $user = $this->userClass::findOneById($userId);
@@ -157,20 +160,23 @@ class MailingModule extends Module implements BootstrapInterface
         /** @var yii\queue\redis\Queue $queue */
         $queue = Yii::$app->get('queue');
 
-        $queue->delay($delay)->push(new SendPushJob([
-            // Ключ шаблона
-            'key' => $key,
-            // Email пользователя
-            'userId' => $userId,
-            // Данные для шаблона
-            'data' => $data,
-            // ID лога
-            'logId' => $logId,
-            // Класс модели пользователя
-            'userClass' => $this->userClass,
-            // Токен авторизации firebase
-            'firebaseToken' => $this->firebaseToken
-        ]));
+        $queue
+            ->delay($delay)
+            ->priority($priority)
+            ->push(new SendPushJob([
+                // Ключ шаблона
+                'key' => $key,
+                // Email пользователя
+                'userId' => $userId,
+                // Данные для шаблона
+                'data' => $data,
+                // ID лога
+                'logId' => $logId,
+                // Класс модели пользователя
+                'userClass' => $this->userClass,
+                // Токен авторизации firebase
+                'firebaseToken' => $this->firebaseToken
+            ]));
     }
 
     /**
@@ -180,7 +186,7 @@ class MailingModule extends Module implements BootstrapInterface
      * @param int    $delay
      * @throws InvalidConfigException
      */
-    public function sendTelegram($userId, $key, $data = [], $delay = 0)
+    public function sendTelegram($userId, $key, $data = [], $delay = 0, $priority = 3)
     {
         /** @var UserInterface $user пользователь */
         $user = $this->userClass::findOneById($userId);
@@ -190,29 +196,32 @@ class MailingModule extends Module implements BootstrapInterface
 
         /** @var yii\queue\redis\Queue $queue */
         $queue = Yii::$app->get('queue');
-        $queue->delay($delay)->push(new SendTelegramJob([
-            // Ключ шаблона
-            'key' => $key,
-            // Данные для шаблона
-            'data' => $data,
-            // ID лога
-            'logId' => $logId,
-            // Домен вайтлейбла
-            'ourDomain' => $this->ourDomain,
-            // Базовые ссылки
-            // [api] => http://api.logtime.local
-            // [signIn] => {host}/auth/sign-in
-            // [payment] => {host}/payment
-            // [unsubscribe] => {host}/auth/unsubscribe
-            // [webApp] => app.{host}
-            'links' => $this->links,
-            // ssl
-            'ssl' => $this->ssl,
-            // Класс модели пользователя
-            'userClass' => $this->userClass,
-            // Апи токен бота
-            'telegramTokenApi' => $this->telegramTokenApi,
-            'userId' => $userId,
-        ]));
+        $queue
+            ->delay($delay)
+            ->priority($priority)
+            ->push(new SendTelegramJob([
+                // Ключ шаблона
+                'key' => $key,
+                // Данные для шаблона
+                'data' => $data,
+                // ID лога
+                'logId' => $logId,
+                // Домен вайтлейбла
+                'ourDomain' => $this->ourDomain,
+                // Базовые ссылки
+                // [api] => http://api.logtime.local
+                // [signIn] => {host}/auth/sign-in
+                // [payment] => {host}/payment
+                // [unsubscribe] => {host}/auth/unsubscribe
+                // [webApp] => app.{host}
+                'links' => $this->links,
+                // ssl
+                'ssl' => $this->ssl,
+                // Класс модели пользователя
+                'userClass' => $this->userClass,
+                // Апи токен бота
+                'telegramTokenApi' => $this->telegramTokenApi,
+                'userId' => $userId,
+            ]));
     }
 }
