@@ -117,5 +117,19 @@ class Template extends ActiveRecord
             $newModelTemplateEmail->templateId = new ObjectId($newModel->_id);
             $newModelTemplateEmail->save();
         }
+
+        foreach ($this->templateEmail as $item) {
+            $newModelTemplateEmail = new TemplatePush();
+            $newModelTemplateEmail->setAttributes($item->getAttributes());
+            $newModelTemplateEmail->templateId = new ObjectId($newModel->_id);
+            $newModelTemplateEmail->save();
+        }
+
+        foreach ($this->templateEmail as $item) {
+            $newModelTemplateEmail = new TemplateTelegram();
+            $newModelTemplateEmail->setAttributes($item->getAttributes());
+            $newModelTemplateEmail->templateId = new ObjectId($newModel->_id);
+            $newModelTemplateEmail->save();
+        }
     }
 }
