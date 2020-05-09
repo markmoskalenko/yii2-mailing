@@ -174,6 +174,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
             $message .= '<br>' . $e->getMessage();
             $message .= '<br>' . $e->getTraceAsString();
             $log->setError($message);
+            $this->user->disableTelegram();
 
             throw new $e;
         }

@@ -92,4 +92,9 @@ interface UserInterface
      * @return string
      */
     public function getAccessToken();
+
+    /**
+     * @return mixed
+     */
+    public function disableTelegram();
 }
