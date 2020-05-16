@@ -4,6 +4,7 @@ use markmoskalenko\mailing\backend\grid\ActionColumn;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\templateEmail\TemplateEmail;
 use markmoskalenko\mailing\common\models\templatePush\TemplatePush;
+use markmoskalenko\mailing\common\models\templateStory\TemplateStory;
 use markmoskalenko\mailing\common\models\templateTelegram\TemplateTelegram;
 use yii\bootstrap4\Html;
 use yii\data\ActiveDataProvider;
@@ -15,6 +16,7 @@ use yii\helpers\Url;
 /* @var ActiveDataProvider $templateEmailProvider */
 /* @var ActiveDataProvider $templatePushProvider */
 /* @var ActiveDataProvider $templateTelegramProvider */
+/* @var ActiveDataProvider $templateStoryProvider */
 
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => 'Письма', 'url' => ['/mailing/template/index']];
@@ -177,6 +179,68 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'copy' => function ($url, $model)
                                 {
                                     $url = ['/mailing/template-telegram/copy', 'id' => (string)$model->_id];
+                                    $title = 'Дублировать сообщение';
+                                    $icon = Html::tag('span', '', ['class' => 'far fa-copy']);
+                                    $options = array_merge([
+                                        'title' => $title,
+                                        'aria-label' => $title,
+                                        'data-pjax' => '0',
+                                        'data-confirm' => 'Дублировать сообщение?'
+                                    ]);
+
+                                    return Html::a($icon, $url, $options);
+                                },
+                            ],
+                            'template' => '{update} {copy} {delete}'
+                        ],
+                    ],
+                ]); ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-5">
+            <div class="card-header border-bottom">
+                <h6 class="m-0">Стори сообщения разделенные по языку</h6>
+                <div class="actions">
+                    <a class="btn-floating-action"
+                       href="<?= Url::to(['/mailing/template-story/create', 'templateId' => (string)$model->_id]) ?>"
+                       data-toggle="tooltip" data-placement="top" data-original-title="Add new">
+                        <i class="fa fa-plus"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0 pb-3">
+                <?= GridView::widget([
+                    'layout' => "{items}\n{pager}",
+                    'dataProvider' => $templateStoryProvider,
+                    'pager' => [
+                        'linkContainerOptions' => ['class' => 'page-item'],
+                        'linkOptions' => ['class' => 'page-link'],
+                        'disabledListItemSubTagOptions' => ['tag' => 'a', 'class' => 'page-link']
+                    ],
+                    'columns' => [
+                        [
+                            'attribute' => TemplateStory::ATTR_PICTURE,
+                            'format' => 'html',
+                            'value' => function (TemplateStory $model)
+                            {
+                                return Html::a(Html::img($model->getSignerImageUrl(), ['width'=>50]), $model->getSignerImageUrl(), ['target'=>'_blank']);
+                            }
+                        ],
+                        TemplateStory::ATTR_SUBJECT,
+                        TemplateStory::ATTR_LANG,
+                        [
+                            'class' => ActionColumn::class,
+                            'controller' => 'template-story',
+                            'buttons' => [
+                                'copy' => function ($url, $model)
+                                {
+                                    $url = ['/mailing/template-story/copy', 'id' => (string)$model->_id];
                                     $title = 'Дублировать сообщение';
                                     $icon = Html::tag('span', '', ['class' => 'far fa-copy']);
                                     $options = array_merge([

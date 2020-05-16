@@ -66,11 +66,16 @@ class TemplateController extends Controller
             'query' => $model->getTemplatePush()
         ]);
 
+        $templateStoryProvider = new ActiveDataProvider([
+            'query' => $model->getTemplateStory()
+        ]);
+
         return $this->render('view', [
             'model' => $model,
             'templateEmailProvider' => $templateEmailProvider,
             'templateTelegramProvider' => $templateTelegramProvider,
             'templatePushProvider' => $templatePushProvider,
+            'templateStoryProvider' => $templateStoryProvider,
         ]);
     }
 
