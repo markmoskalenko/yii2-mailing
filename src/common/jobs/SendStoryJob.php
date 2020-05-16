@@ -124,10 +124,11 @@ class SendStoryJob extends BaseObject implements JobInterface
                 throw new ErrorException('Шаблон не найден ' . $this->key . ':' . $data['{sourceDomain}']);
             }
 
-
             foreach ($templateStory as $story) {
                 $this->sendStory($story, $this->userId);
             }
+
+            $this->user->sendNotificationNewStories($this->userId);
 
             $log->send();
         } catch (Throwable $e) {
