@@ -3,6 +3,7 @@
 namespace markmoskalenko\mailing\common\models\story;
 
 use markmoskalenko\mailing\common\models\ActiveRecord;
+use markmoskalenko\mailing\common\models\templateStory\TemplateStory;
 use MongoDB\BSON\ObjectId;
 
 /**
@@ -167,5 +168,23 @@ class Story extends ActiveRecord
             [static::ATTR_IS_WATCHED, 'default', 'value' => false],
             [static::ATTR_IS_WATCHED, 'filter', 'filter' => 'boolval'],
         ];
+    }
+
+    public static function create(TemplateStory $templateStory, $userId)
+    {
+        $story = new Story();
+        $story->imageUrl = $templateStory->getSignerImageUrl(true);
+        $story->youtubeId = $templateStory->youtubeId;
+        $story->text = $templateStory->text;
+        $story->buttonIsShow = $templateStory->buttonIsShow;
+        $story->buttonText = $templateStory->buttonText;
+        $story->buttonType = $templateStory->buttonType;
+        $story->buttonCallback = $templateStory->buttonCallback;
+        $story->isActive = true;
+        $story->isWatched = false;
+        $story->templateStoryId = $templateStory->_id;
+        $story->userId = new ObjectId($userId);
+
+        return $story->save();
     }
 }
