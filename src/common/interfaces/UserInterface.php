@@ -97,4 +97,10 @@ interface UserInterface
      * @return mixed
      */
     public function disableTelegram();
+
+    /**
+     * @param string $userId
+     * @return mixed
+     */
+    public function sendNotificationNewStories(string $userId);
 }

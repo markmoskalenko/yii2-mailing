@@ -5,6 +5,7 @@ namespace markmoskalenko\mailing\common\models\template;
 use markmoskalenko\mailing\common\models\ActiveRecord;
 use markmoskalenko\mailing\common\models\templateEmail\TemplateEmail;
 use markmoskalenko\mailing\common\models\templatePush\TemplatePush;
+use markmoskalenko\mailing\common\models\templateStory\TemplateStory;
 use markmoskalenko\mailing\common\models\templateTelegram\TemplateTelegram;
 use MongoDB\BSON\ObjectId;
 
@@ -19,6 +20,7 @@ use MongoDB\BSON\ObjectId;
  * @property TemplateEmail[]    $templateEmail
  * @property TemplatePush[]     $templatePush
  * @property TemplateTelegram[] $templateTelegram
+ * @property TemplateStory[] $templateStory
  */
 class Template extends ActiveRecord
 {

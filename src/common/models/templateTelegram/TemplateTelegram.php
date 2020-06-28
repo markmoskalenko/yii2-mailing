@@ -19,7 +19,6 @@ use rise\mongoObjectBehavior\MongoObjectIdBehavior;
  * @property string   $affiliateDomain
  * @property string   $picture
  * @property array    $keyboard
- * @property boolean  $isInlineKeyboard
  *
  * @property Template $template
  */

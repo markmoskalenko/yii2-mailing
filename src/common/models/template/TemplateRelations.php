@@ -4,6 +4,7 @@ namespace markmoskalenko\mailing\common\models\template;
 
 use markmoskalenko\mailing\common\models\templateEmail\TemplateEmail;
 use markmoskalenko\mailing\common\models\templatePush\TemplatePush;
+use markmoskalenko\mailing\common\models\templateStory\TemplateStory;
 use markmoskalenko\mailing\common\models\templateTelegram\TemplateTelegram;
 
 /**
@@ -33,5 +34,13 @@ trait TemplateRelations
     public function getTemplatePush()
     {
         return $this->hasMany(TemplatePush::class, [TemplatePush::ATTR_TEMPLATE_ID => Template::ATTR_MONGO_ID]);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTemplateStory()
+    {
+        return $this->hasMany(TemplateStory::class, [TemplateStory::ATTR_TEMPLATE_ID => Template::ATTR_MONGO_ID]);
     }
 }

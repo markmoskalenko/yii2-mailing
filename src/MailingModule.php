@@ -5,6 +5,7 @@ namespace markmoskalenko\mailing;
 use markmoskalenko\mailing\common\interfaces\UserInterface;
 use markmoskalenko\mailing\common\jobs\SendMailingJob;
 use markmoskalenko\mailing\common\jobs\SendPushJob;
+use markmoskalenko\mailing\common\jobs\SendStoryJob;
 use markmoskalenko\mailing\common\jobs\SendTelegramJob;
 use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
 use Yii;
@@ -200,28 +201,42 @@ class MailingModule extends Module implements BootstrapInterface
             ->delay($delay)
             ->priority($priority)
             ->push(new SendTelegramJob([
-                // Ключ шаблона
                 'key' => $key,
-                // Данные для шаблона
                 'data' => $data,
-                // ID лога
                 'logId' => $logId,
-                // Домен вайтлейбла
                 'ourDomain' => $this->ourDomain,
-                // Базовые ссылки
-                // [api] => http://api.logtime.local
-                // [signIn] => {host}/auth/sign-in
-                // [payment] => {host}/payment
-                // [unsubscribe] => {host}/auth/unsubscribe
-                // [webApp] => app.{host}
                 'links' => $this->links,
-                // ssl
                 'ssl' => $this->ssl,
-                // Класс модели пользователя
                 'userClass' => $this->userClass,
-                // Апи токен бота
                 'telegramTokenApi' => $this->telegramTokenApi,
                 'userId' => $userId,
             ]));
+    }
+
+    /**
+     * @param        $userId
+     * @param string $key
+     * @throws InvalidConfigException
+     */
+    public function sendStory($userId, $key)
+    {
+        /** @var UserInterface $user пользователь */
+        $user = $this->userClass::findOneById($userId);
+
+        /** @var EmailSendLog $logId логер отправки */
+        $logId = EmailSendLog::start($userId, $key, $user);
+
+        /** @var yii\queue\redis\Queue $queue */
+        $queue = Yii::$app->get('queue');
+        $queue->push(new SendStoryJob([
+            'key' => $key,
+            'data' => [],
+            'logId' => $logId,
+            'ourDomain' => $this->ourDomain,
+            'links' => $this->links,
+            'ssl' => $this->ssl,
+            'userClass' => $this->userClass,
+            'userId' => $userId,
+        ]));
     }
 }

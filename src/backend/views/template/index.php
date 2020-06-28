@@ -72,6 +72,10 @@ $this->title = 'Письма';
                                     $result[] = 'Telegram';
                                 }
 
+                                if ($model->templateStory) {
+                                    $result[] = 'Story';
+                                }
+
                                 return implode(', ', $result);
                             }
                         ],
