@@ -16,7 +16,8 @@ class EmailSendLogSearch extends EmailSendLog
     public function rules()
     {
         return [
-            ['email', 'safe']
+            [self::ATTR_EMAIL, 'safe'],
+            [self::ATTR_TEMPLATE_KEY, 'safe'],
         ];
     }
 
@@ -41,7 +42,7 @@ class EmailSendLogSearch extends EmailSendLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'  => ['defaultOrder' => [static::ATTR_MONGO_ID => SORT_DESC]]
+            'sort' => ['defaultOrder' => [static::ATTR_MONGO_ID => SORT_DESC]]
         ]);
 
         $this->load($params);
@@ -59,7 +60,7 @@ class EmailSendLogSearch extends EmailSendLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'  => ['defaultOrder' => [static::ATTR_MONGO_ID => SORT_DESC]]
+            'sort' => ['defaultOrder' => [static::ATTR_MONGO_ID => SORT_DESC]]
         ]);
 
         $this->load($params, null);
@@ -68,7 +69,8 @@ class EmailSendLogSearch extends EmailSendLog
             return [];
         }
 
-        $query->andFilterWhere(['like', 'email', $this->email]);
+        $query->andFilterWhere(['like', self::ATTR_EMAIL, $this->email]);
+        $query->andFilterWhere([self::ATTR_TEMPLATE_KEY => $this->templateKey]);
 
         return $dataProvider;
     }

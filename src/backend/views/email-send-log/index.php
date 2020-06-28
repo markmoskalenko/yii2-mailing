@@ -14,7 +14,7 @@ $this->title = 'Лог отправки писем на почту';
 $this->params['breadcrumbs'][] = $this->title;
 
 Modal::begin([
-    'id'    => 'errorModal',
+    'id' => 'errorModal',
     'title' => 'Лог ошибки',
 ]);
 Modal::end();;
@@ -28,60 +28,54 @@ Modal::end();;
 
     <div class="row">
         <div class="col-12">
-            <div class="card mb-3">
-                <div class="card-body">
-                    <?= $this->render('_search', [
-                        'model' => $searchModel
-                    ]) ?>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12">
             <div class="card mb-5">
                 <div class="card-header border-bottom">
                     <h6 class="m-0">Список</h6>
                 </div>
                 <div class="card-body p-0 pb-3">
                     <?= GridView::widget([
-                        'layout'       => "{items}\n{pager}",
+                        'layout' => "{items}\n{pager}",
                         'dataProvider' => $dataProvider,
-                        'pager'        => [
-                            'linkContainerOptions'          => ['class' => 'page-item'],
-                            'linkOptions'                   => ['class' => 'page-link'],
+                        'filterModel' => $searchModel,
+                        'pager' => [
+                            'linkContainerOptions' => ['class' => 'page-item'],
+                            'linkOptions' => ['class' => 'page-link'],
                             'disabledListItemSubTagOptions' => ['tag' => 'a', 'class' => 'page-link']
                         ],
-                        'columns'      => [
+                        'columns' => [
                             [
                                 'attribute' => EmailSendLog::ATTR_EMAIL,
                             ],
                             [
+                                'attribute' => EmailSendLog::ATTR_TEMPLATE_KEY,
+                            ],
+                            [
                                 'attribute' => EmailSendLog::ATTR_CREATED_AT,
-                                'value'     => function (EmailSendLog $item)
+                                'value' => function (EmailSendLog $item)
                                 {
                                     return $item->createdAtFormatAdmin();
                                 }
                             ],
                             [
                                 'attribute' => EmailSendLog::ATTR_CREATED_AT,
-                                'value'     => function (EmailSendLog $item)
+                                'value' => function (EmailSendLog $item)
                                 {
                                     return $item->sendAtFormatAdmin();
                                 }
                             ],
                             [
                                 'attribute' => EmailSendLog::ATTR_CREATED_AT,
-                                'value'     => function (EmailSendLog $item)
+                                'value' => function (EmailSendLog $item)
                                 {
                                     return $item->openAtFormatAdmin();
                                 }
                             ],
                             [
-                                'format'    => 'raw',
+                                'format' => 'raw',
                                 'attribute' => EmailSendLog::ATTR_OPEN_IP,
                             ],
                             [
-                                'format'    => 'raw',
+                                'format' => 'raw',
                                 'attribute' => EmailSendLog::ATTR_ERROR,
 
                                 'value' => function (EmailSendLog $item)
@@ -93,7 +87,7 @@ Modal::end();;
                             ],
                             [
                                 'format' => 'raw',
-                                'value'  => function (EmailSendLog $item)
+                                'value' => function (EmailSendLog $item)
                                 {
                                     return Html::a('заметки',
                                             ['/note/index', 'NoteSearchAdmin' => ['userId' => (string)$item->userId]],
@@ -116,7 +110,7 @@ Modal::end();;
             white-space: pre-wrap;
         }
 
-        #errorModal .modal-dialog{
+        #errorModal .modal-dialog {
             max-width: 80%;
         }
     </style>
