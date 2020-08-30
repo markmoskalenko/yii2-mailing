@@ -10,18 +10,20 @@ use MongoDB\BSON\ObjectId;
  * Истории
  *
  * @property ObjectId $_id
- * @property string   $id
- * @property string   $imageUrl
- * @property string   $youtubeId
- * @property string   $text
- * @property boolean  $buttonIsShow
- * @property string   $buttonText
- * @property string   $buttonType
- * @property string   $buttonCallback
- * @property boolean  $isActive
- * @property boolean  $isWatched
+ * @property string $id
+ * @property string $imageUrl
+ * @property string $lottie
+ * @property string $youtubeId
+ * @property string $text
+ * @property boolean $buttonIsShow
+ * @property string $buttonText
+ * @property string $buttonType
+ * @property string $buttonCallback
+ * @property boolean $isActive
+ * @property boolean $isWatched
  * @property ObjectId $userId
  * @property ObjectId $templateStoryId
+ * @property ObjectId $templateGroupKey
  *
  * @SWG\Definition(
  *     definition="Story",
@@ -29,6 +31,7 @@ use MongoDB\BSON\ObjectId;
  *     type="object",
  *     @SWG\Property(property="id", type="string", description="ID сториса"),
  *     @SWG\Property(property="imageUrl", type="string", description="Url на картинку сториса"),
+ *     @SWG\Property(property="lottie", type="string", description="JSON анимации"),
  *     @SWG\Property(property="youtubeId", type="string", description="ID youtube видео для проигрывания"),
  *     @SWG\Property(property="text", type="string", description="Некий текст который при клике на кнопку нужно вставить в поле заметки"),
  *     @SWG\Property(property="buttonIsShow", type="string", description="Показывать ли кнопку"),
@@ -36,34 +39,37 @@ use MongoDB\BSON\ObjectId;
  *     @SWG\Property(property="buttonType", type="string", description="Тип кнопки"),
  *     @SWG\Property(property="buttonCallback", type="string", description="Действие кнопки при клике"),
  *     @SWG\Property(property="isWatched", type="string", description="Просмотрен ли сторис"),
+ *     @SWG\Property(property="templateGroupKey", type="string", description="Ключ группы сторисов"),
  * )
  */
 class Story extends ActiveRecord
 {
     use StoryFinder;
 
-    const ATTR_ID                = 'id';
-    const ATTR_MONGO_ID          = '_id';
-    const ATTR_IMAGE_URL         = 'imageUrl';
-    const ATTR_YOUTUBE_ID        = 'youtubeId';
-    const ATTR_TEXT              = 'text';
-    const ATTR_BUTTON_IS_SHOW    = 'buttonIsShow';
-    const ATTR_BUTTON_TEXT       = 'buttonText';
-    const ATTR_BUTTON_TYPE       = 'buttonType';
-    const ATTR_BUTTON_CALLBACK   = 'buttonCallback';
-    const ATTR_IS_ACTIVE         = 'isActive';
-    const ATTR_IS_WATCHED        = 'isWatched';
-    const ATTR_USER_ID           = 'userId';
+    const ATTR_ID = 'id';
+    const ATTR_MONGO_ID = '_id';
+    const ATTR_IMAGE_URL = 'imageUrl';
+    const ATTR_LOTTIE = 'lottie';
+    const ATTR_YOUTUBE_ID = 'youtubeId';
+    const ATTR_TEXT = 'text';
+    const ATTR_BUTTON_IS_SHOW = 'buttonIsShow';
+    const ATTR_BUTTON_TEXT = 'buttonText';
+    const ATTR_BUTTON_TYPE = 'buttonType';
+    const ATTR_BUTTON_CALLBACK = 'buttonCallback';
+    const ATTR_IS_ACTIVE = 'isActive';
+    const ATTR_IS_WATCHED = 'isWatched';
+    const ATTR_USER_ID = 'userId';
     const ATTR_TEMPLATE_STORY_ID = 'templateStoryId';
+    const ATTR_TEMPLATE_GROUP_KEY = 'templateGroupKey';
 
     const BUTTON_STYLE_1 = 'style1';
     const BUTTON_STYLE_2 = 'style2';
 
-    const CALLBACK_ACTION_SHOW_VIDEO                = 'showVideo';
-    const CALLBACK_ACTION_CREATE_NOTE               = 'createNote';
+    const CALLBACK_ACTION_SHOW_VIDEO = 'showVideo';
+    const CALLBACK_ACTION_CREATE_NOTE = 'createNote';
     const CALLBACK_ACTION_CREATE_NOTE_AND_COPY_TEXT = 'createNoteAndCopyText';
-    const CALLBACK_ACTION_CREATE_TASK               = 'createTask';
-    const CALLBACK_ACTION_CREATE_TARGET             = 'createTarget';
+    const CALLBACK_ACTION_CREATE_TASK = 'createTask';
+    const CALLBACK_ACTION_CREATE_TARGET = 'createTarget';
 
     public static $callbackActionLabels = [
         self::CALLBACK_ACTION_SHOW_VIDEO => 'Показать видео',
@@ -103,6 +109,7 @@ class Story extends ActiveRecord
         return [
             static::ATTR_MONGO_ID,
             static::ATTR_YOUTUBE_ID,
+            static::ATTR_LOTTIE,
             static::ATTR_TEXT,
             static::ATTR_BUTTON_IS_SHOW,
             static::ATTR_BUTTON_TEXT,
@@ -113,6 +120,7 @@ class Story extends ActiveRecord
             static::ATTR_IS_WATCHED,
             static::ATTR_USER_ID,
             static::ATTR_TEMPLATE_STORY_ID,
+            static::ATTR_TEMPLATE_GROUP_KEY,
         ];
     }
 
@@ -121,6 +129,7 @@ class Story extends ActiveRecord
         return [
             static::ATTR_ID => static::ATTR_MONGO_ID,
             static::ATTR_YOUTUBE_ID,
+            static::ATTR_LOTTIE,
             static::ATTR_TEXT,
             static::ATTR_BUTTON_IS_SHOW,
             static::ATTR_BUTTON_TEXT,
@@ -129,6 +138,7 @@ class Story extends ActiveRecord
             static::ATTR_IMAGE_URL,
             static::ATTR_IS_ACTIVE,
             static::ATTR_IS_WATCHED,
+            static::ATTR_TEMPLATE_GROUP_KEY,
         ];
     }
 
@@ -167,24 +177,10 @@ class Story extends ActiveRecord
             [static::ATTR_IS_WATCHED, 'boolean', 'trueValue' => true, 'falseValue' => false],
             [static::ATTR_IS_WATCHED, 'default', 'value' => false],
             [static::ATTR_IS_WATCHED, 'filter', 'filter' => 'boolval'],
+            //
+            [static::ATTR_TEMPLATE_GROUP_KEY, 'required'],
+            //
+            [static::ATTR_LOTTIE, 'safe'],
         ];
-    }
-
-    public static function create(TemplateStory $templateStory, $userId)
-    {
-        $story = new Story();
-        $story->imageUrl = $templateStory->getSignerImageUrl(true);
-        $story->youtubeId = $templateStory->youtubeId;
-        $story->text = $templateStory->text;
-        $story->buttonIsShow = $templateStory->buttonIsShow;
-        $story->buttonText = $templateStory->buttonText;
-        $story->buttonType = $templateStory->buttonType;
-        $story->buttonCallback = $templateStory->buttonCallback;
-        $story->isActive = true;
-        $story->isWatched = false;
-        $story->templateStoryId = $templateStory->_id;
-        $story->userId = new ObjectId($userId);
-
-        return $story->save();
     }
 }

@@ -3,11 +3,13 @@
 namespace markmoskalenko\mailing\common\jobs;
 
 use markmoskalenko\mailing\common\helpers\LinksHelpers;
+use markmoskalenko\mailing\common\interfaces\BroadcastServiceInterface;
 use markmoskalenko\mailing\common\interfaces\UserInterface;
 use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
 use markmoskalenko\mailing\common\models\story\Story;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\templateStory\TemplateStory;
+use markmoskalenko\mailing\common\services\StoryService;
 use MongoDB\BSON\ObjectId;
 use Throwable;
 use yii\base\BaseObject;
@@ -71,6 +73,10 @@ class SendStoryJob extends BaseObject implements JobInterface
      */
     public $data;
 
+    /**
+     * @var
+     */
+    public $broadcastServiceClass;
 
     /**
      * @param Queue $queue
@@ -78,6 +84,8 @@ class SendStoryJob extends BaseObject implements JobInterface
      */
     public function execute($queue)
     {
+        /** @var BroadcastServiceInterface $broadcastService */
+        $broadcastService = new $this->broadcastServiceClass;
         $this->user = $this->userClass::findOneById($this->userId);
 
         $template = Template::findByKey($this->key);
@@ -128,7 +136,7 @@ class SendStoryJob extends BaseObject implements JobInterface
                 $this->sendStory($story, $this->userId);
             }
 
-            $this->user->sendNotificationNewStories($this->userId);
+            $broadcastService->dispatch('[Story] Refresh', (string)$this->userId, true);
 
             $log->send();
         } catch (Throwable $e) {
@@ -148,6 +156,8 @@ class SendStoryJob extends BaseObject implements JobInterface
      */
     private function sendStory(TemplateStory $templateStory, $userId)
     {
-        return Story::create($templateStory, $userId);
+        $storyService = new StoryService();
+
+        return $storyService->sendStroy($templateStory, $userId);
     }
 }

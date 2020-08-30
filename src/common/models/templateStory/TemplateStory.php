@@ -14,19 +14,20 @@ use yii\web\UploadedFile;
  * Шаблоны Telegram
  *
  * @property ObjectId $_id
- * @property string   $id
+ * @property string $id
  * @property ObjectId $templateId
- * @property string   $lang
- * @property string   $affiliateDomain
- * @property string   $picture
- * @property string   $youtubeId
- * @property string   $text
- * @property boolean  $buttonIsShow
- * @property string   $buttonText
- * @property string   $buttonType
- * @property string   $buttonCallback
- * @property string   $image
- * @property string   $subject
+ * @property string $lang
+ * @property string $affiliateDomain
+ * @property string $picture
+ * @property string $lottie
+ * @property string $youtubeId
+ * @property string $text
+ * @property boolean $buttonIsShow
+ * @property string $buttonText
+ * @property string $buttonType
+ * @property string $buttonCallback
+ * @property string $image
+ * @property string $subject
  *
  * @property Template $template
  */
@@ -38,19 +39,20 @@ class TemplateStory extends ActiveRecord
 
     public $image;
 
-    const ATTR_MONGO_ID         = '_id';
-    const ATTR_TEMPLATE_ID      = 'templateId';
-    const ATTR_LANG             = 'lang';
+    const ATTR_MONGO_ID = '_id';
+    const ATTR_TEMPLATE_ID = 'templateId';
+    const ATTR_LANG = 'lang';
+    const ATTR_LOTTIE = 'lottie';
     const ATTR_AFFILIATE_DOMAIN = 'affiliateDomain';
-    const ATTR_PICTURE          = 'picture';
-    const ATTR_YOUTUBE_ID       = 'youtubeId';
-    const ATTR_TEXT             = 'text';
-    const ATTR_BUTTON_IS_SHOW   = 'buttonIsShow';
-    const ATTR_BUTTON_TEXT      = 'buttonText';
-    const ATTR_BUTTON_TYPE      = 'buttonType';
-    const ATTR_BUTTON_CALLBACK  = 'buttonCallback';
-    const ATTR_IMAGE            = 'image';
-    const ATTR_SUBJECT          = 'subject';
+    const ATTR_PICTURE = 'picture';
+    const ATTR_YOUTUBE_ID = 'youtubeId';
+    const ATTR_TEXT = 'text';
+    const ATTR_BUTTON_IS_SHOW = 'buttonIsShow';
+    const ATTR_BUTTON_TEXT = 'buttonText';
+    const ATTR_BUTTON_TYPE = 'buttonType';
+    const ATTR_BUTTON_CALLBACK = 'buttonCallback';
+    const ATTR_IMAGE = 'image';
+    const ATTR_SUBJECT = 'subject';
 
     public static $languages = ['en', 'ru'];
     public static $languagesName = ['en' => 'Английский', 'ru' => 'Русский'];
@@ -89,6 +91,7 @@ class TemplateStory extends ActiveRecord
             static::ATTR_BUTTON_TYPE,
             static::ATTR_BUTTON_CALLBACK,
             static::ATTR_SUBJECT,
+            static::ATTR_LOTTIE,
         ];
     }
 
@@ -101,6 +104,7 @@ class TemplateStory extends ActiveRecord
             static::ATTR_MONGO_ID => 'ID',
             static::ATTR_TEMPLATE_ID => 'Шаблон',
             static::ATTR_LANG => 'Язык',
+            static::ATTR_LOTTIE => 'JSON анимации',
             static::ATTR_AFFILIATE_DOMAIN => 'Партнерский домен',
             static::ATTR_PICTURE => 'Картинка',
             static::ATTR_YOUTUBE_ID => 'ID видео',
@@ -128,7 +132,6 @@ class TemplateStory extends ActiveRecord
             [static::ATTR_AFFILIATE_DOMAIN, 'required'],
             [static::ATTR_AFFILIATE_DOMAIN, 'string'],
             //
-            [static::ATTR_PICTURE, 'required'],
             [static::ATTR_PICTURE, 'string'],
             //
             [static::ATTR_YOUTUBE_ID, 'string'],
@@ -149,6 +152,8 @@ class TemplateStory extends ActiveRecord
             //
             [static::ATTR_SUBJECT, 'required'],
             [static::ATTR_SUBJECT, 'string'],
+            //
+            [static::ATTR_LOTTIE, 'safe'],
         ];
     }
 

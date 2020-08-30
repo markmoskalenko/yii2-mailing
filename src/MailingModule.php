@@ -2,6 +2,7 @@
 
 namespace markmoskalenko\mailing;
 
+use markmoskalenko\mailing\common\interfaces\BroadcastServiceInterface;
 use markmoskalenko\mailing\common\interfaces\UserInterface;
 use markmoskalenko\mailing\common\jobs\SendMailingJob;
 use markmoskalenko\mailing\common\jobs\SendPushJob;
@@ -72,6 +73,11 @@ class MailingModule extends Module implements BootstrapInterface
     public $ssl = true;
 
     /**
+     * @var BroadcastServiceInterface
+     */
+    public $broadcastService;
+
+    /**
      * @inheritdoc
      */
     public function bootstrap($app)
@@ -91,9 +97,9 @@ class MailingModule extends Module implements BootstrapInterface
 
     /**
      * @param string $email почта пользователя
-     * @param string $key   ключ email шаблона
-     * @param array  $data  дополнительные данные для шаблона
-     * @param int    $delay задержка отправки
+     * @param string $key ключ email шаблона
+     * @param array $data дополнительные данные для шаблона
+     * @param int $delay задержка отправки
      * @throws InvalidConfigException
      */
     public function send($email, $key, $data = [], $delay = 0, $priority = 3)
@@ -145,9 +151,9 @@ class MailingModule extends Module implements BootstrapInterface
 
     /**
      * @param        $userId
-     * @param string $key   ключ email шаблона
-     * @param array  $data  дополнительные данные для шаблона
-     * @param int    $delay задержка отправки
+     * @param string $key ключ email шаблона
+     * @param array $data дополнительные данные для шаблона
+     * @param int $delay задержка отправки
      * @throws InvalidConfigException
      */
     public function sendPush($userId, $key, $data = [], $delay = 0, $priority = 3)
@@ -183,8 +189,8 @@ class MailingModule extends Module implements BootstrapInterface
     /**
      * @param        $userId
      * @param string $key
-     * @param array  $data
-     * @param int    $delay
+     * @param array $data
+     * @param int $delay
      * @throws InvalidConfigException
      */
     public function sendTelegram($userId, $key, $data = [], $delay = 0, $priority = 3)
@@ -237,6 +243,7 @@ class MailingModule extends Module implements BootstrapInterface
             'ssl' => $this->ssl,
             'userClass' => $this->userClass,
             'userId' => $userId,
+            'broadcastServiceClass' => $this->broadcastService
         ]));
     }
 }

@@ -73,7 +73,7 @@ class SendMailingJob extends BaseObject implements JobInterface
     public $links;
 
     /**
-     * Домен logtime.ru / mybase.pro
+     * Домен logtime.me / mybase.pro
      *
      * @var string
      */

@@ -15,8 +15,8 @@ class LinksHelpers
         // Если нету партнера тогда ставим наш домен
         $sourceDomain = $referral ? $referral->affiliateDomain : $ourDomain;
 
-        if ($sourceDomain == 'logtime.local' || $sourceDomain == 'dev.logtime.ru') {
-            $sourceDomain = 'logtime.ru';
+        if ($sourceDomain == 'logtime.local' || $sourceDomain == 'dev.logtime.me') {
+            $sourceDomain = 'logtime.me';
         }
 
         // Защищенный протокол или нет
