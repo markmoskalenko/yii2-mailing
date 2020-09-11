@@ -16,6 +16,7 @@ class TemplateSearch extends Template
     public function rules()
     {
         return [
+            ['group', 'safe']
         ];
     }
 
@@ -52,6 +53,9 @@ class TemplateSearch extends Template
             return [];
         }
 
+        $query->andFilterWhere(['group' => $this->group ? (int)$this->group : null]);
+
+
         return $dataProvider;
     }
 
@@ -71,6 +75,8 @@ class TemplateSearch extends Template
         if (!$this->validate()) {
             return [];
         }
+
+        $query->andFilterWhere(['group' => $this->group]);
 
         return $dataProvider;
     }

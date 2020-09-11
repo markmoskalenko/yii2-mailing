@@ -8,7 +8,7 @@ use yii\helpers\ArrayHelper;
 
 class LinksHelpers
 {
-    public static function getLinks(UserInterface $user, $referral, bool $ssl, $links, $ourDomain, $logId, $data)
+    public static function getLinks(UserInterface $user, $referral, bool $ssl, $links, $ourDomain, $logId, $data = [])
     {
 
         // Домен на который будут перенаправлять все письма

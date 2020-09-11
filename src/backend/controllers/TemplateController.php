@@ -21,13 +21,14 @@ class TemplateController extends Controller
     /**
      * @return string|Response
      */
-    public function actionIndex()
+    public function actionIndex($group = Template::GROUP_TRIGGER)
     {
         $searchModel = new TemplateSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->get());
+        $dataProvider = $searchModel->search(array_merge(Yii::$app->request->get(), ['group' => $group]));
 
         return $this->render('index', [
-            'dataProvider' => $dataProvider
+            'dataProvider' => $dataProvider,
+            'group' => $group
         ]);
     }
 

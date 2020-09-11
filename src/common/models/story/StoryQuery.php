@@ -11,9 +11,9 @@ use yii\mongodb\ActiveQuery;
  */
 class StoryQuery extends ActiveQuery
 {
-    public function owner()
+    public function owner($id = false)
     {
-        return $this->andWhere([Story::ATTR_USER_ID => Yii::$app->user->getId()]);
+        return $this->andWhere([Story::ATTR_USER_ID => $id ? new ObjectId($id) : Yii::$app->user->getId()]);
     }
 
     public function active()

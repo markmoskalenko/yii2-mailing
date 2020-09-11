@@ -70,6 +70,7 @@ class Story extends ActiveRecord
     const CALLBACK_ACTION_CREATE_NOTE_AND_COPY_TEXT = 'createNoteAndCopyText';
     const CALLBACK_ACTION_CREATE_TASK = 'createTask';
     const CALLBACK_ACTION_CREATE_TARGET = 'createTarget';
+    const CALLBACK_ACTION_CLOSE_STORY = 'closeStory';
 
     public static $callbackActionLabels = [
         self::CALLBACK_ACTION_SHOW_VIDEO => 'Показать видео',
@@ -77,6 +78,7 @@ class Story extends ActiveRecord
         self::CALLBACK_ACTION_CREATE_NOTE_AND_COPY_TEXT => 'Открыть создание заметки и скопировать текст',
         self::CALLBACK_ACTION_CREATE_TASK => 'Открыть создание задачи',
         self::CALLBACK_ACTION_CREATE_TARGET => 'Открыть экран целей',
+        self::CALLBACK_ACTION_CLOSE_STORY => 'Закрыть сторисы',
     ];
 
     public static $buttonStyleLabels = [
@@ -124,6 +126,9 @@ class Story extends ActiveRecord
         ];
     }
 
+    /**
+     * @return array|string[]
+     */
     public function fields()
     {
         return [
@@ -167,7 +172,6 @@ class Story extends ActiveRecord
             //
             [static::ATTR_BUTTON_CALLBACK, 'string'],
             //
-            [static::ATTR_IMAGE_URL, 'required'],
             [static::ATTR_IMAGE_URL, 'string'],
             //
             [static::ATTR_IS_ACTIVE, 'boolean', 'trueValue' => true, 'falseValue' => false],

@@ -2,6 +2,7 @@
 
 namespace markmoskalenko\mailing;
 
+use markmoskalenko\mailing\common\helpers\LinksHelpers;
 use markmoskalenko\mailing\common\interfaces\BroadcastServiceInterface;
 use markmoskalenko\mailing\common\interfaces\UserInterface;
 use markmoskalenko\mailing\common\jobs\SendMailingJob;
@@ -9,11 +10,17 @@ use markmoskalenko\mailing\common\jobs\SendPushJob;
 use markmoskalenko\mailing\common\jobs\SendStoryJob;
 use markmoskalenko\mailing\common\jobs\SendTelegramJob;
 use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
+use markmoskalenko\mailing\common\models\story\Story;
+use markmoskalenko\mailing\common\models\template\Template;
+use markmoskalenko\mailing\common\models\templateStory\TemplateStory;
+use markmoskalenko\mailing\common\services\StoryService;
 use Yii;
 use yii\base\BootstrapInterface;
+use yii\base\ErrorException;
 use yii\base\InvalidConfigException;
 use yii\base\Module;
 use yii\console\Application;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class MailingModule
@@ -224,26 +231,69 @@ class MailingModule extends Module implements BootstrapInterface
      * @param string $key
      * @throws InvalidConfigException
      */
-    public function sendStory($userId, $key)
+    public function sendStory($userId, $key, $isDispatch = true)
     {
-        /** @var UserInterface $user пользователь */
         $user = $this->userClass::findOneById($userId);
+        $log = EmailSendLog::start($userId, $key, $user, true);
+        $template = Template::findByKey($key);
 
-        /** @var EmailSendLog $logId логер отправки */
-        $logId = EmailSendLog::start($userId, $key, $user);
+        if (!$log) {
+            // в телеграм
+            throw new ErrorException('Лог не найден');
+        }
 
-        /** @var yii\queue\redis\Queue $queue */
-        $queue = Yii::$app->get('queue');
-        $queue->push(new SendStoryJob([
-            'key' => $key,
-            'data' => [],
-            'logId' => $logId,
-            'ourDomain' => $this->ourDomain,
-            'links' => $this->links,
-            'ssl' => $this->ssl,
-            'userClass' => $this->userClass,
-            'userId' => $userId,
-            'broadcastServiceClass' => $this->broadcastService
-        ]));
+        if (!$template) {
+            throw new ErrorException('Шаблон не найден ' . $key);
+        }
+
+        if (!$user) {
+            throw new ErrorException('Пользователь не найден ' . $userId);
+        }
+
+        // Поиск основного партнера по реферальному домену
+        // @todo переименовать в affiliate
+        $referral = $user->getReferralByAffiliateDomain()->one();
+
+        $data = LinksHelpers::getLinks(
+            $user,
+            $referral,
+            $this->ssl,
+            $this->links,
+            $this->ourDomain,
+            (string)$log->_id
+        );
+
+        // Шаблон письма для отправки
+        // Ищет по ключу, языку и домену партнера
+        $templateStory = TemplateStory::findAllByKeyAndLangAndAffiliateDomain(
+            $template->_id,
+            $user->getLanguage(),
+            $data['{sourceDomain}']
+        );
+
+        if (!$templateStory) {
+            throw new ErrorException('Шаблон не найден :' . $user->getLanguage() . ':' . $key . ':' . $data['{sourceDomain}']);
+        }
+
+        $newStoriesId = [];
+        foreach ($templateStory as $story) {
+            $storyService = new StoryService();
+            $newStoriesId[] = $storyService->sendStroy($story, $userId)->_id;
+        }
+
+
+        if ($isDispatch) {
+            $stories = Story::find()
+                ->orderBy(['_id' => SORT_DESC])
+                ->owner($userId)
+                ->active()
+                ->all();
+            
+            $stories = ArrayHelper::toArray($stories);
+            $dispatchService = new $this->broadcastService;
+            $dispatchService->dispatch('[Story] Set', ['stories' => $stories], true, (string)$userId);
+        }
+
+        return $newStoriesId;
     }
 }

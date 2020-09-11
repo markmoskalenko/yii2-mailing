@@ -12,6 +12,9 @@ trait TemplateStoryFormatter
 {
     public function getSignerImageUrl($isResetCache = false)
     {
+        if (!$this->picture) {
+            return null;
+        }
         $cache = Yii::$app->cache;
 
         $id = md5($this->picture);

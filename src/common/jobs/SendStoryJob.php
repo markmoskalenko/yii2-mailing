@@ -14,6 +14,7 @@ use MongoDB\BSON\ObjectId;
 use Throwable;
 use yii\base\BaseObject;
 use yii\base\ErrorException;
+use yii\helpers\ArrayHelper;
 use yii\queue\JobInterface;
 use yii\queue\Queue;
 
@@ -92,61 +93,69 @@ class SendStoryJob extends BaseObject implements JobInterface
 
         $log = EmailSendLog::findOne($this->logId);
 
-        try {
-            if (!$log) {
-                // в телеграм
-                throw new ErrorException('Лог не найден');
-            }
-
-            if (!$template) {
-                throw new ErrorException('Шаблон не найден ' . $this->key);
-            }
-
-            if (!$this->user) {
-                throw new ErrorException('Пользователь не найден ' . $this->userId);
-            }
-
-            // Поиск основного партнера по реферальному домену
-            // @todo переименовать в affiliate
-            $referral = $this->user->getReferralByAffiliateDomain()->one();
-
-            $data = LinksHelpers::getLinks(
-                $this->user,
-                $referral,
-                $this->ssl,
-                $this->links,
-                $this->ourDomain,
-                $this->logId,
-                $this->data
-            );
-
-            // Шаблон письма для отправки
-            // Ищет по ключу, языку и домену партнера
-            $templateStory = TemplateStory::findAllByKeyAndLangAndAffiliateDomain(
-                $template->_id,
-                $this->user->getLanguage(),
-                $data['{sourceDomain}']
-            );
-
-            if (!$templateStory) {
-                throw new ErrorException('Шаблон не найден ' . $this->key . ':' . $data['{sourceDomain}']);
-            }
-
-            foreach ($templateStory as $story) {
-                $this->sendStory($story, $this->userId);
-            }
-
-            $broadcastService->dispatch('[Story] Refresh', (string)$this->userId, true);
-
-            $log->send();
-        } catch (Throwable $e) {
-            $message = '';
-            $message .= '<br>' . $e->getMessage();
-            $message .= '<br>' . $e->getTraceAsString();
-            $log->setError($message);
-
-            throw new $e;
+        //        try {
+        if (!$log) {
+            // в телеграм
+            throw new ErrorException('Лог не найден');
         }
+
+        if (!$template) {
+            throw new ErrorException('Шаблон не найден ' . $this->key);
+        }
+
+        if (!$this->user) {
+            throw new ErrorException('Пользователь не найден ' . $this->userId);
+        }
+
+        // Поиск основного партнера по реферальному домену
+        // @todo переименовать в affiliate
+        $referral = $this->user->getReferralByAffiliateDomain()->one();
+
+        $data = LinksHelpers::getLinks(
+            $this->user,
+            $referral,
+            $this->ssl,
+            $this->links,
+            $this->ourDomain,
+            $this->logId,
+            $this->data
+        );
+
+        // Шаблон письма для отправки
+        // Ищет по ключу, языку и домену партнера
+        $templateStory = TemplateStory::findAllByKeyAndLangAndAffiliateDomain(
+            $template->_id,
+            $this->user->getLanguage(),
+            $data['{sourceDomain}']
+        );
+
+        if (!$templateStory) {
+            throw new ErrorException('Шаблон не найден :' . $this->user->getLanguage() . ':' . $this->key . ':' . $data['{sourceDomain}']);
+        }
+
+        foreach ($templateStory as $story) {
+            $this->sendStory($story, $this->userId);
+        }
+
+//        $stories = Story::find()
+//            ->orderBy(['_id' => SORT_DESC])
+//            ->owner($this->userId)
+//            ->active()
+//            ->all();
+//
+//        $stories = ArrayHelper::toArray($stories);
+//
+//        $broadcastService->dispatch('[Story] Set', $stories, true, (string)$this->userId);
+//
+//        $log->send();
+        //        } catch (Throwable $e) {
+        //            $message = '';
+        //            $message .= '<br>' . $e->getMessage();
+        //            $message .= '<br>' . $e->getTraceAsString();
+        //            $log->setError($message);
+        //
+        //            throw new $e;
+        //        }
     }
 
     /**
