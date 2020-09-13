@@ -22,6 +22,7 @@ use MongoDB\BSON\ObjectId;
  * @property boolean $isActive
  * @property boolean $isWatched
  * @property ObjectId $userId
+ * @property ObjectId $templateId
  * @property ObjectId $templateStoryId
  * @property ObjectId $templateGroupKey
  *
@@ -61,6 +62,7 @@ class Story extends ActiveRecord
     const ATTR_USER_ID = 'userId';
     const ATTR_TEMPLATE_STORY_ID = 'templateStoryId';
     const ATTR_TEMPLATE_GROUP_KEY = 'templateGroupKey';
+    const ATTR_TEMPLATE_ID = 'templateId';
 
     const BUTTON_STYLE_1 = 'style1';
     const BUTTON_STYLE_2 = 'style2';
@@ -123,6 +125,7 @@ class Story extends ActiveRecord
             static::ATTR_USER_ID,
             static::ATTR_TEMPLATE_STORY_ID,
             static::ATTR_TEMPLATE_GROUP_KEY,
+            static::ATTR_TEMPLATE_ID,
         ];
     }
 
@@ -144,6 +147,7 @@ class Story extends ActiveRecord
             static::ATTR_IS_ACTIVE,
             static::ATTR_IS_WATCHED,
             static::ATTR_TEMPLATE_GROUP_KEY,
+            static::ATTR_TEMPLATE_ID,
         ];
     }
 
@@ -154,6 +158,7 @@ class Story extends ActiveRecord
     {
         return [
             //
+            [static::ATTR_TEMPLATE_ID, 'required'],
             [static::ATTR_TEMPLATE_STORY_ID, 'required'],
             //
             [static::ATTR_USER_ID, 'required'],

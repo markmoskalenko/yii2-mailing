@@ -17,4 +17,13 @@ class TemplateQuery extends ActiveQuery
     {
         return $this->andWhere([Template::ATTR_KEY => $id]);
     }
+
+    /**
+     * @param $group
+     * @return TemplateQuery
+     */
+    public function byGroup($group)
+    {
+        return $this->andWhere([Template::ATTR_GROUP => (int)$group]);
+    }
 }
