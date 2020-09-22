@@ -291,7 +291,7 @@ class MailingModule extends Module implements BootstrapInterface
             
             $stories = ArrayHelper::toArray($stories);
             $dispatchService = new $this->broadcastService;
-            $dispatchService->dispatch('[Story] Set', ['stories' => $stories], true, (string)$userId);
+            $dispatchService->dispatch('[Story] Update', ['stories' => $stories], true, (string)$userId);
         }
 
         return $newStoriesId;

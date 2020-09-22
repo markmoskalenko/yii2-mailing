@@ -136,26 +136,6 @@ class SendStoryJob extends BaseObject implements JobInterface
         foreach ($templateStory as $story) {
             $this->sendStory($story, $this->userId);
         }
-
-//        $stories = Story::find()
-//            ->orderBy(['_id' => SORT_DESC])
-//            ->owner($this->userId)
-//            ->active()
-//            ->all();
-//
-//        $stories = ArrayHelper::toArray($stories);
-//
-//        $broadcastService->dispatch('[Story] Set', $stories, true, (string)$this->userId);
-//
-//        $log->send();
-        //        } catch (Throwable $e) {
-        //            $message = '';
-        //            $message .= '<br>' . $e->getMessage();
-        //            $message .= '<br>' . $e->getTraceAsString();
-        //            $log->setError($message);
-        //
-        //            throw new $e;
-        //        }
     }
 
     /**
