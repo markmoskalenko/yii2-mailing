@@ -34,8 +34,9 @@ class StorySearch extends Story
     public function search()
     {
         $query = Story::find()
-            ->orderBy(['_id' => SORT_DESC])
             ->owner()
+            ->globalChannel()
+            ->orderBy(['_id' => SORT_ASC])
             ->active();
 
         $dataProvider = new ActiveDataProvider([

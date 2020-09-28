@@ -23,6 +23,7 @@ use MongoDB\BSON\ObjectId;
  * @property boolean $isWatched
  * @property ObjectId $userId
  * @property ObjectId $templateId
+ * @property ObjectId $channel
  * @property ObjectId $templateStoryId
  * @property ObjectId $templateGroupKey
  *
@@ -63,6 +64,7 @@ class Story extends ActiveRecord
     const ATTR_TEMPLATE_STORY_ID = 'templateStoryId';
     const ATTR_TEMPLATE_GROUP_KEY = 'templateGroupKey';
     const ATTR_TEMPLATE_ID = 'templateId';
+    const ATTR_CHANNEL = 'channel';
 
     const BUTTON_STYLE_1 = 'style1';
     const BUTTON_STYLE_2 = 'style2';
@@ -73,6 +75,9 @@ class Story extends ActiveRecord
     const CALLBACK_ACTION_CREATE_TASK = 'createTask';
     const CALLBACK_ACTION_CREATE_TARGET = 'createTarget';
     const CALLBACK_ACTION_CLOSE_STORY = 'closeStory';
+
+    const CHANNEL_GLOBAL = 'global';
+    const CHANNEL_STORY = 'story';
 
     public static $callbackActionLabels = [
         self::CALLBACK_ACTION_SHOW_VIDEO => 'Показать видео',
@@ -126,6 +131,7 @@ class Story extends ActiveRecord
             static::ATTR_TEMPLATE_STORY_ID,
             static::ATTR_TEMPLATE_GROUP_KEY,
             static::ATTR_TEMPLATE_ID,
+            static::ATTR_CHANNEL,
         ];
     }
 
@@ -148,6 +154,7 @@ class Story extends ActiveRecord
             static::ATTR_IS_WATCHED,
             static::ATTR_TEMPLATE_GROUP_KEY,
             static::ATTR_TEMPLATE_ID,
+            static::ATTR_CHANNEL,
         ];
     }
 
@@ -190,6 +197,9 @@ class Story extends ActiveRecord
             [static::ATTR_TEMPLATE_GROUP_KEY, 'required'],
             //
             [static::ATTR_LOTTIE, 'safe'],
+            //
+            [static::ATTR_CHANNEL, 'default', 'value' => self::CHANNEL_GLOBAL],
+            [static::ATTR_CHANNEL, 'in', 'range' => [self::CHANNEL_GLOBAL, self::CHANNEL_STORY]]
         ];
     }
 }

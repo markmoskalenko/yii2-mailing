@@ -231,7 +231,7 @@ class MailingModule extends Module implements BootstrapInterface
      * @param string $key
      * @throws InvalidConfigException
      */
-    public function sendStory($userId, $key, $isDispatch = true)
+    public function sendStory($userId, $key, $isDispatch = true, $channel = Story::CHANNEL_GLOBAL)
     {
         $user = $this->userClass::findOneById($userId);
         $log = EmailSendLog::start($userId, $key, $user, true);
@@ -278,15 +278,15 @@ class MailingModule extends Module implements BootstrapInterface
         $newStoriesId = [];
         foreach ($templateStory as $story) {
             $storyService = new StoryService();
-            $newStoriesId[] = $storyService->sendStroy($story, $userId)->_id;
+            $newStoriesId[] = $storyService->sendStroy($story, $userId, $channel)->_id;
         }
-
 
         if ($isDispatch) {
             $stories = Story::find()
-                ->orderBy(['_id' => SORT_DESC])
                 ->owner($userId)
                 ->active()
+                ->globalChannel()
+                ->orderBy(['_id' => SORT_ASC])
                 ->all();
             
             $stories = ArrayHelper::toArray($stories);

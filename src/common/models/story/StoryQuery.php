@@ -21,6 +21,11 @@ class StoryQuery extends ActiveQuery
         return $this->andWhere([Story::ATTR_IS_ACTIVE => true]);
     }
 
+    public function globalChannel()
+    {
+        return $this->andWhere([Story::ATTR_CHANNEL => Story::CHANNEL_GLOBAL]);
+    }
+
     public function byId($id)
     {
         return $this->andWhere([Story::ATTR_MONGO_ID => new ObjectId($id)]);
