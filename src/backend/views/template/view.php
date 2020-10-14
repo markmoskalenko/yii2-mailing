@@ -229,7 +229,15 @@ $this->params['breadcrumbs'][] = $this->title;
                             'format' => 'html',
                             'value' => function (TemplateStory $model)
                             {
-                                return Html::a(Html::img($model->getSignerImageUrl(), ['width'=>50]), $model->getSignerImageUrl(), ['target'=>'_blank']);
+                                return Html::a(Html::img($model->getImageUrl(), ['width'=>50]), $model->getImageUrl(), ['target'=>'_blank']);
+                            }
+                        ],
+                        [
+                            'attribute' => TemplateStory::ATTR_VIDEO,
+                            'format' => 'html',
+                            'value' => function (TemplateStory $model)
+                            {
+                                return $model->video ? Html::a( 'Октрыть видео', $model->getVideoUrl(), ['target'=>'_blank']) : '';
                             }
                         ],
                         TemplateStory::ATTR_SUBJECT,

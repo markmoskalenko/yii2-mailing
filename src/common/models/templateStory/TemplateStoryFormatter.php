@@ -10,34 +10,37 @@ use Yii;
  */
 trait TemplateStoryFormatter
 {
-    public function getSignerImageUrl($isResetCache = false)
+    /**
+     * @return string|null
+     */
+    public function getImageUrl()
     {
         if (!$this->picture) {
             return null;
         }
-        $cache = Yii::$app->cache;
 
+        $params = Yii::$app->params;
         $id = md5($this->picture);
-        $key = "file:{$id}";
-        $result = $cache->get($key);
+        $cloudfront = $params['s3.cloudfront.education.domain'];
+        $url = $cloudfront . '/' . $this->picture;
 
-        if (!$result || $isResetCache) {
-            /** @var array $sizes */
-            $params = Yii::$app->params;
-            /** @var string $bucket */
-            $bucket = $params['s3.bucket'];
-            /** @var string $signedSecret */
-            $signedSecret = Yii::getAlias($params['s3.cloudfront.signed.secret']);
-            /** @var string $signedKey */
-            $signedKey = Yii::getAlias($params['s3.cloudfront.signed.key']);
-            $cloudfront = $params['s3.cloudfront.domain'];
-            $signer = new UrlSigner($signedKey, $signedSecret);
-            $expired = time() + 604800;
-            $url = $cloudfront . '/' . $this->picture;
-            $result = $signer->getSignedUrl($url, $expired);
-            $cache->set($key, $result, 604800);
+        return $url;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getVideoUrl()
+    {
+        if (!$this->video) {
+            return null;
         }
 
-        return $result;
+        $params = Yii::$app->params;
+        $id = md5($this->video);
+        $cloudfront = $params['s3.cloudfront.education.domain'];
+        $url = $cloudfront . '/' . $this->video;
+
+        return $url;
     }
 }

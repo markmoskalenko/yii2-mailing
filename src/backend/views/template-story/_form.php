@@ -22,6 +22,7 @@ use yii\bootstrap4\Html;
           <?= $form->field($model,
               TemplateStory::ATTR_AFFILIATE_DOMAIN)->hint('Домен партнера без http://. Пример: mybase.pro') ?>
           <?= $form->field($model, TemplateStory::ATTR_IMAGE)->fileInput() ?>
+          <?= $form->field($model, TemplateStory::ATTR_VIDEO)->fileInput() ?>
           <?= $form->field($model, TemplateStory::ATTR_LOTTIE)->textarea(['rows' => 10]) ?>
           <?= $form->field($model, TemplateStory::ATTR_SUBJECT) ?>
           <?= $form->field($model, TemplateStory::ATTR_YOUTUBE_ID) ?>

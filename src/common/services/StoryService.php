@@ -22,7 +22,8 @@ class StoryService
     public function sendStroy(TemplateStory $templateStory, $userId, $channel = Story::CHANNEL_GLOBAL)
     {
         $story = new Story();
-        $story->imageUrl = $templateStory->getSignerImageUrl(true);
+        $story->imageUrl = $templateStory->getImageUrl();
+        $story->videoUrl = $templateStory->getVideoUrl();
         $story->youtubeId = $templateStory->youtubeId;
         $story->text = $templateStory->text;
         $story->buttonIsShow = $templateStory->buttonIsShow;

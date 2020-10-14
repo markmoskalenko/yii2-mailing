@@ -28,6 +28,7 @@ use yii\web\UploadedFile;
  * @property string $buttonCallback
  * @property string $image
  * @property string $subject
+ * @property string $video
  *
  * @property Template $template
  */
@@ -52,6 +53,7 @@ class TemplateStory extends ActiveRecord
     const ATTR_BUTTON_TYPE = 'buttonType';
     const ATTR_BUTTON_CALLBACK = 'buttonCallback';
     const ATTR_IMAGE = 'image';
+    const ATTR_VIDEO = 'video';
     const ATTR_SUBJECT = 'subject';
 
     public static $languages = ['en', 'ru'];
@@ -92,6 +94,7 @@ class TemplateStory extends ActiveRecord
             static::ATTR_BUTTON_CALLBACK,
             static::ATTR_SUBJECT,
             static::ATTR_LOTTIE,
+            static::ATTR_VIDEO,
         ];
     }
 
@@ -107,7 +110,7 @@ class TemplateStory extends ActiveRecord
             static::ATTR_LOTTIE => 'JSON анимации',
             static::ATTR_AFFILIATE_DOMAIN => 'Партнерский домен',
             static::ATTR_PICTURE => 'Картинка',
-            static::ATTR_YOUTUBE_ID => 'ID видео',
+            static::ATTR_YOUTUBE_ID => 'ID видео для воспроизведения youtube',
             static::ATTR_TEXT => 'Вопрос для ответа',
             static::ATTR_BUTTON_IS_SHOW => 'Показывать ли кнопку',
             static::ATTR_BUTTON_TEXT => 'Текст кнопки',
@@ -115,6 +118,7 @@ class TemplateStory extends ActiveRecord
             static::ATTR_BUTTON_CALLBACK => 'Событие при клике',
             static::ATTR_IMAGE => 'Картинка',
             static::ATTR_SUBJECT => 'Описание для админки',
+            static::ATTR_VIDEO => 'Видео',
         ];
     }
 
@@ -150,6 +154,8 @@ class TemplateStory extends ActiveRecord
             //
             [static::ATTR_IMAGE, 'file'],
             //
+            [static::ATTR_VIDEO, 'file'],
+            //
             [static::ATTR_SUBJECT, 'required'],
             [static::ATTR_SUBJECT, 'string'],
             //
@@ -176,18 +182,38 @@ class TemplateStory extends ActiveRecord
     public function beforeValidate()
     {
         $this->image = UploadedFile::getInstance($this, self::ATTR_IMAGE);
+        $this->video = UploadedFile::getInstance($this, self::ATTR_VIDEO);
 
         if ($this->image) {
+            /** @var \frostealth\yii2\aws\s3\Service $s3 */
             $s3 = Yii::$app->get('s3');
             $uid = md5(uniqid(time(), true)) . '.' . $this->image->getExtension();
             $s3
                 ->commands()
                 ->upload($uid, $this->image->tempName)
                 ->withContentType($this->image->type)
+                ->inBucket('logtime-education')
+                ->withAcl('public-read')
                 ->withParam('CacheControl', 'max-age=31536000, s-maxage=2592000')
                 ->execute();
 
             $this->picture = $uid;
+        }
+
+        if ($this->video) {
+            /** @var \frostealth\yii2\aws\s3\Service $s3 */
+            $s3 = Yii::$app->get('s3');
+            $uid = md5(uniqid(time(), true)) . '.' . $this->video->getExtension();
+            $s3
+                ->commands()
+                ->upload($uid, $this->video->tempName)
+                ->withContentType($this->video->type)
+                ->inBucket('logtime-education')
+                ->withAcl('public-read')
+                ->withParam('CacheControl', 'max-age=31536000, s-maxage=2592000')
+                ->execute();
+
+            $this->video = $uid;
         }
 
         return parent::beforeValidate();

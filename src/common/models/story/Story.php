@@ -12,6 +12,7 @@ use MongoDB\BSON\ObjectId;
  * @property ObjectId $_id
  * @property string $id
  * @property string $imageUrl
+ * @property string $videoUrl
  * @property string $lottie
  * @property string $youtubeId
  * @property string $text
@@ -33,6 +34,7 @@ use MongoDB\BSON\ObjectId;
  *     type="object",
  *     @SWG\Property(property="id", type="string", description="ID сториса"),
  *     @SWG\Property(property="imageUrl", type="string", description="Url на картинку сториса"),
+ *     @SWG\Property(property="videoUrl", type="string", description="Url на видео сториса"),
  *     @SWG\Property(property="lottie", type="string", description="JSON анимации"),
  *     @SWG\Property(property="youtubeId", type="string", description="ID youtube видео для проигрывания"),
  *     @SWG\Property(property="text", type="string", description="Некий текст который при клике на кнопку нужно вставить в поле заметки"),
@@ -51,6 +53,7 @@ class Story extends ActiveRecord
     const ATTR_ID = 'id';
     const ATTR_MONGO_ID = '_id';
     const ATTR_IMAGE_URL = 'imageUrl';
+    const ATTR_VIDEO_URL = 'videoUrl';
     const ATTR_LOTTIE = 'lottie';
     const ATTR_YOUTUBE_ID = 'youtubeId';
     const ATTR_TEXT = 'text';
@@ -132,6 +135,7 @@ class Story extends ActiveRecord
             static::ATTR_TEMPLATE_GROUP_KEY,
             static::ATTR_TEMPLATE_ID,
             static::ATTR_CHANNEL,
+            static::ATTR_VIDEO_URL,
         ];
     }
 
@@ -155,6 +159,7 @@ class Story extends ActiveRecord
             static::ATTR_TEMPLATE_GROUP_KEY,
             static::ATTR_TEMPLATE_ID,
             static::ATTR_CHANNEL,
+            static::ATTR_VIDEO_URL,
         ];
     }
 
@@ -185,6 +190,8 @@ class Story extends ActiveRecord
             [static::ATTR_BUTTON_CALLBACK, 'string'],
             //
             [static::ATTR_IMAGE_URL, 'string'],
+            //
+            [static::ATTR_VIDEO_URL, 'string'],
             //
             [static::ATTR_IS_ACTIVE, 'boolean', 'trueValue' => true, 'falseValue' => false],
             [static::ATTR_IS_ACTIVE, 'default', 'value' => false],
