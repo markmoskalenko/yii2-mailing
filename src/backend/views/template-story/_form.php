@@ -28,6 +28,8 @@ use yii\bootstrap4\Html;
           <?= $form->field($model, TemplateStory::ATTR_YOUTUBE_ID) ?>
       </div>
       <div class="col-md-6">
+          <?= $form->field($model, TemplateStory::ATTR_API_CALLBACK)->textInput() ?>
+          <?= $form->field($model, TemplateStory::ATTR_IS_REQUIRED_WATCH)->checkbox() ?>
           <?= $form->field($model, TemplateStory::ATTR_BUTTON_IS_SHOW)->checkbox() ?>
           <?= $form->field($model, TemplateStory::ATTR_BUTTON_TEXT) ?>
           <?= $form->field($model, TemplateStory::ATTR_BUTTON_TYPE)->dropDownList(Story::$buttonStyleLabels,

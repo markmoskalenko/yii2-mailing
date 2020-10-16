@@ -41,6 +41,7 @@ class Template extends ActiveRecord
     const GROUP_AUTO_FUNNEL = 102;
     const GROUP_TRIGGER = 103;
     const GROUP_ONBOARDING = 104;
+    const GROUP_VIDEO_OF_DAY = 105;
 
     const GROUP_NAME = [
         self::GROUP_TRIGGER => 'Триггерные сообщения',
@@ -48,6 +49,7 @@ class Template extends ActiveRecord
         self::GROUP_STOCK => 'Акционные сообщения',
         self::GROUP_AUTO_FUNNEL => 'Автоворонка',
         self::GROUP_ONBOARDING => 'Онбординг',
+        self::GROUP_VIDEO_OF_DAY => 'Видео дня',
     ];
 
     /**

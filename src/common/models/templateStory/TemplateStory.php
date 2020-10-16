@@ -29,6 +29,8 @@ use yii\web\UploadedFile;
  * @property string $image
  * @property string $subject
  * @property string $video
+ * @property string $isRequiredWatch
+ * @property string $apiCallback
  *
  * @property Template $template
  */
@@ -55,6 +57,8 @@ class TemplateStory extends ActiveRecord
     const ATTR_IMAGE = 'image';
     const ATTR_VIDEO = 'video';
     const ATTR_SUBJECT = 'subject';
+    const ATTR_IS_REQUIRED_WATCH = 'isRequiredWatch';
+    const ATTR_API_CALLBACK = 'apiCallback';
 
     public static $languages = ['en', 'ru'];
     public static $languagesName = ['en' => 'Английский', 'ru' => 'Русский'];
@@ -95,6 +99,8 @@ class TemplateStory extends ActiveRecord
             static::ATTR_SUBJECT,
             static::ATTR_LOTTIE,
             static::ATTR_VIDEO,
+            static::ATTR_IS_REQUIRED_WATCH,
+            static::ATTR_API_CALLBACK,
         ];
     }
 
@@ -119,6 +125,8 @@ class TemplateStory extends ActiveRecord
             static::ATTR_IMAGE => 'Картинка',
             static::ATTR_SUBJECT => 'Описание для админки',
             static::ATTR_VIDEO => 'Видео',
+            static::ATTR_IS_REQUIRED_WATCH => 'Не удалять пока не просмотрит',
+            static::ATTR_API_CALLBACK => 'Действие после просмотра сториса',
         ];
     }
 
@@ -146,11 +154,17 @@ class TemplateStory extends ActiveRecord
             [static::ATTR_BUTTON_IS_SHOW, 'default', 'value' => false],
             [static::ATTR_BUTTON_IS_SHOW, 'filter', 'filter' => 'boolval'],
             //
+            [static::ATTR_IS_REQUIRED_WATCH, 'boolean', 'trueValue' => true, 'falseValue' => false],
+            [static::ATTR_IS_REQUIRED_WATCH, 'default', 'value' => false],
+            [static::ATTR_IS_REQUIRED_WATCH, 'filter', 'filter' => 'boolval'],
+            //
             [static::ATTR_BUTTON_TEXT, 'string'],
             //
             [static::ATTR_BUTTON_TYPE, 'string'],
             //
             [static::ATTR_BUTTON_CALLBACK, 'string'],
+            //
+            [static::ATTR_API_CALLBACK, 'string'],
             //
             [static::ATTR_IMAGE, 'file'],
             //

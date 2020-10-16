@@ -20,8 +20,10 @@ use MongoDB\BSON\ObjectId;
  * @property string $buttonText
  * @property string $buttonType
  * @property string $buttonCallback
+ * @property string $apiCallback
  * @property boolean $isActive
  * @property boolean $isWatched
+ * @property boolean $isRequiredWatch
  * @property ObjectId $userId
  * @property ObjectId $templateId
  * @property ObjectId $channel
@@ -44,6 +46,7 @@ use MongoDB\BSON\ObjectId;
  *     @SWG\Property(property="buttonCallback", type="string", description="Действие кнопки при клике"),
  *     @SWG\Property(property="isWatched", type="string", description="Просмотрен ли сторис"),
  *     @SWG\Property(property="templateGroupKey", type="string", description="Ключ группы сторисов"),
+ *     @SWG\Property(property="isRequiredWatch", type="string", description="Обязательный к просмотру"),
  * )
  */
 class Story extends ActiveRecord
@@ -68,6 +71,8 @@ class Story extends ActiveRecord
     const ATTR_TEMPLATE_GROUP_KEY = 'templateGroupKey';
     const ATTR_TEMPLATE_ID = 'templateId';
     const ATTR_CHANNEL = 'channel';
+    const ATTR_IS_REQUIRED_WATCH = 'isRequiredWatch';
+    const ATTR_API_CALLBACK = 'apiCallback';
 
     const BUTTON_STYLE_1 = 'style1';
     const BUTTON_STYLE_2 = 'style2';
@@ -136,6 +141,8 @@ class Story extends ActiveRecord
             static::ATTR_TEMPLATE_ID,
             static::ATTR_CHANNEL,
             static::ATTR_VIDEO_URL,
+            static::ATTR_IS_REQUIRED_WATCH,
+            static::ATTR_API_CALLBACK,
         ];
     }
 
@@ -193,9 +200,15 @@ class Story extends ActiveRecord
             //
             [static::ATTR_VIDEO_URL, 'string'],
             //
+            [static::ATTR_API_CALLBACK, 'string'],
+            //
             [static::ATTR_IS_ACTIVE, 'boolean', 'trueValue' => true, 'falseValue' => false],
             [static::ATTR_IS_ACTIVE, 'default', 'value' => false],
             [static::ATTR_IS_ACTIVE, 'filter', 'filter' => 'boolval'],
+            //
+            [static::ATTR_IS_REQUIRED_WATCH, 'boolean', 'trueValue' => true, 'falseValue' => false],
+            [static::ATTR_IS_REQUIRED_WATCH, 'default', 'value' => false],
+            [static::ATTR_IS_REQUIRED_WATCH, 'filter', 'filter' => 'boolval'],
             //
             [static::ATTR_IS_WATCHED, 'boolean', 'trueValue' => true, 'falseValue' => false],
             [static::ATTR_IS_WATCHED, 'default', 'value' => false],

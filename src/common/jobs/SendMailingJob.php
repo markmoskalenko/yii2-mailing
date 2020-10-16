@@ -201,17 +201,19 @@ class SendMailingJob extends BaseObject implements JobInterface
                 $body = str_replace($key, $value, $body);
             }
 
-            $isSend = $mailer
-                ->compose('layouts/' . $this->layout, ['content' => $body])
-                ->setSubject($templateEmail->subject)
-                ->setFrom($sender)
-                ->setTo($this->email)
-                ->send();
+            if (YII_ENV_PROD) {
+                $isSend = $mailer
+                    ->compose('layouts/' . $this->layout, ['content' => $body])
+                    ->setSubject($templateEmail->subject)
+                    ->setFrom($sender)
+                    ->setTo($this->email)
+                    ->send();
 
-            if ($isSend) {
-                $log->send();
-            } else {
-                $log->setError('Ошибка отправки');
+                if ($isSend) {
+                    $log->send();
+                } else {
+                    $log->setError('Ошибка отправки');
+                }
             }
         } catch (Throwable $e) {
             $message = '[Отправитель]: ' . print_r($sender, true);

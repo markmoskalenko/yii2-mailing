@@ -38,6 +38,8 @@ class StoryService
         $story->lottie = $templateStory->lottie;
         $story->templateId = $templateStory->templateId;
         $story->channel = $channel;
+        $story->isRequiredWatch = $templateStory->isRequiredWatch;
+        $story->apiCallback = $templateStory->apiCallback;
 
         if (!$story->save()) {
             throw new ErrorException('Ошибка создания сториса для пользователя: ' . var_export($story->getErrors(), true));
