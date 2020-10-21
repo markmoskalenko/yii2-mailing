@@ -41,6 +41,7 @@ class TemplateStory extends ActiveRecord
     use TemplateStoryFormatter;
 
     public $image;
+    public $videoFile;
 
     const ATTR_MONGO_ID = '_id';
     const ATTR_TEMPLATE_ID = 'templateId';
@@ -59,6 +60,7 @@ class TemplateStory extends ActiveRecord
     const ATTR_SUBJECT = 'subject';
     const ATTR_IS_REQUIRED_WATCH = 'isRequiredWatch';
     const ATTR_API_CALLBACK = 'apiCallback';
+    const ATTR_VIDEO_FILE = 'videoFile';
 
     public static $languages = ['en', 'ru'];
     public static $languagesName = ['en' => 'Английский', 'ru' => 'Русский'];
@@ -127,6 +129,7 @@ class TemplateStory extends ActiveRecord
             static::ATTR_VIDEO => 'Видео',
             static::ATTR_IS_REQUIRED_WATCH => 'Не удалять пока не просмотрит',
             static::ATTR_API_CALLBACK => 'Действие после просмотра сториса',
+            static::ATTR_VIDEO_FILE => 'Видео',
         ];
     }
 
@@ -168,7 +171,9 @@ class TemplateStory extends ActiveRecord
             //
             [static::ATTR_IMAGE, 'file'],
             //
-            [static::ATTR_VIDEO, 'file'],
+            [static::ATTR_VIDEO_FILE, 'file'],
+            //
+            [static::ATTR_VIDEO, 'string'],
             //
             [static::ATTR_SUBJECT, 'required'],
             [static::ATTR_SUBJECT, 'string'],
@@ -196,7 +201,7 @@ class TemplateStory extends ActiveRecord
     public function beforeValidate()
     {
         $this->image = UploadedFile::getInstance($this, self::ATTR_IMAGE);
-        $this->video = UploadedFile::getInstance($this, self::ATTR_VIDEO);
+        $this->videoFile = UploadedFile::getInstance($this, self::ATTR_VIDEO_FILE);
 
         if ($this->image) {
             /** @var \frostealth\yii2\aws\s3\Service $s3 */
@@ -214,14 +219,14 @@ class TemplateStory extends ActiveRecord
             $this->picture = $uid;
         }
 
-        if ($this->video) {
+        if ($this->videoFile) {
             /** @var \frostealth\yii2\aws\s3\Service $s3 */
             $s3 = Yii::$app->get('s3');
-            $uid = md5(uniqid(time(), true)) . '.' . $this->video->getExtension();
+            $uid = md5(uniqid(time(), true)) . '.' . $this->videoFile->getExtension();
             $s3
                 ->commands()
-                ->upload($uid, $this->video->tempName)
-                ->withContentType($this->video->type)
+                ->upload($uid, $this->videoFile->tempName)
+                ->withContentType($this->videoFile->type)
                 ->inBucket('logtime-education')
                 ->withAcl('public-read')
                 ->withParam('CacheControl', 'max-age=31536000, s-maxage=2592000')
