@@ -111,9 +111,11 @@ class TemplateController extends Controller
     public function actionDelete($id)
     {
         $model = $this->findModel($id);
+        $gorup = $model->group;
+
         $model->delete();
 
-        return $this->redirect(['/mailing/template/index']);
+        return $this->redirect(['/mailing/template/index', 'gorup' => $gorup]);
     }
 
     /**
@@ -168,7 +170,7 @@ class TemplateController extends Controller
         $model = $this->findModel($id);
         $model->copy();
 
-        return $this->redirect(['/mailing/template/index']);
+        return $this->redirect(['/mailing/template/index', 'gorup' => $gorup]);
     }
 
 
