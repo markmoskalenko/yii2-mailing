@@ -84,9 +84,14 @@ interface UserInterface
     public static function findOneById(string $id);
 
     /**
-     * @return string
+     * @return array
      */
     public function getFirebaseToken();
+
+    /**
+     *
+     */
+    public function deleteFirebaseToken($token);
 
     /**
      * @return string

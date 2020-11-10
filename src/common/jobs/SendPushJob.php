@@ -81,11 +81,9 @@ class SendPushJob extends BaseObject implements JobInterface
             throw new ErrorException('Лог не найден');
         }
 
-        $fireBaseToken = $this->user->getFirebaseToken();
+        $fireBaseTokens = $this->user->getFirebaseToken();
 
-        if (!$fireBaseToken) {
-            $log->setError('Нет Firebase токена');
-        } else {
+        foreach ($fireBaseTokens as $token) {
             try {
                 // Сообщение для отправки
                 // Ищет по ключу, языку и домены партнера
@@ -107,7 +105,6 @@ class SendPushJob extends BaseObject implements JobInterface
 
                 $data = array_merge($baseData, $this->data);
 
-
                 $body = $templatePush->body;
 
                 // Подмена данных в шаблоне из переданных переменных
@@ -115,15 +112,21 @@ class SendPushJob extends BaseObject implements JobInterface
                     $body = str_replace($key, $value, $body);
                 }
 
-                $message = CloudMessage::withTarget('token', $fireBaseToken)
-                    ->withNotification(Notification::create($templatePush->title, $body));
+                $fireBaseToken = $token['token'];
+                try {
+                    $message = CloudMessage::withTarget('token', $fireBaseToken)
+                        ->withNotification(Notification::create($templatePush->title, $body));
+                    (new Factory())
+                        ->withServiceAccount($this->firebaseToken)
+                        ->createMessaging()
+                        ->send($message);
 
-                (new Factory())
-                    ->withServiceAccount($this->firebaseToken)
-                    ->createMessaging()
-                    ->send($message);
+                    $log->send();
+                } catch (\Kreait\Firebase\Exception\Messaging\NotFound $e) {
+                    echo 'error: ' . $fireBaseToken . PHP_EOL;
+                    $this->user->deleteFirebaseToken($token);
+                }
 
-                $log->send();
             } catch (Throwable $e) {
                 $log->setError('Ошибка отправки');
                 $message = $e->getMessage();
