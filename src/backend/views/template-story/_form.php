@@ -26,6 +26,8 @@ use yii\bootstrap4\Html;
           <?= $form->field($model, TemplateStory::ATTR_LOTTIE)->textarea(['rows' => 10]) ?>
           <?= $form->field($model, TemplateStory::ATTR_SUBJECT) ?>
           <?= $form->field($model, TemplateStory::ATTR_YOUTUBE_ID) ?>
+          <?= $form->field($model, TemplateStory::ATTR_BG_COLOR) ?>
+          <?= $form->field($model, TemplateStory::ATTR_VIDEO_ORIENTATION)->dropDownList(TemplateStory::$videoOrientations) ?>
       </div>
       <div class="col-md-6">
           <?= $form->field($model, TemplateStory::ATTR_API_CALLBACK)->textInput() ?>

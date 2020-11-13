@@ -31,6 +31,8 @@ use yii\web\UploadedFile;
  * @property string $video
  * @property string $isRequiredWatch
  * @property string $apiCallback
+ * @property string $bgColor
+ * @property integer $videoOrientation
  *
  * @property Template $template
  */
@@ -61,9 +63,12 @@ class TemplateStory extends ActiveRecord
     const ATTR_IS_REQUIRED_WATCH = 'isRequiredWatch';
     const ATTR_API_CALLBACK = 'apiCallback';
     const ATTR_VIDEO_FILE = 'videoFile';
+    const ATTR_BG_COLOR = 'bgColor';
+    const ATTR_VIDEO_ORIENTATION = 'videoOrientation';
 
     public static $languages = ['en', 'ru'];
     public static $languagesName = ['en' => 'Английский', 'ru' => 'Русский'];
+    public static $videoOrientations = [0 => 'Вертикальный', 1 => 'Горизонтальный'];
 
     /**
      * @return TemplateStoryQuery
@@ -103,6 +108,8 @@ class TemplateStory extends ActiveRecord
             static::ATTR_VIDEO,
             static::ATTR_IS_REQUIRED_WATCH,
             static::ATTR_API_CALLBACK,
+            static::ATTR_BG_COLOR,
+            static::ATTR_VIDEO_ORIENTATION,
         ];
     }
 
@@ -130,6 +137,8 @@ class TemplateStory extends ActiveRecord
             static::ATTR_IS_REQUIRED_WATCH => 'Не удалять пока не просмотрит',
             static::ATTR_API_CALLBACK => 'Действие после просмотра сториса',
             static::ATTR_VIDEO_FILE => 'Видео',
+            static::ATTR_BG_COLOR => 'Цвет подложки сториса',
+            static::ATTR_VIDEO_ORIENTATION => 'Ориентация видео',
         ];
     }
 
@@ -139,6 +148,10 @@ class TemplateStory extends ActiveRecord
     public function rules()
     {
         return [
+            [static::ATTR_BG_COLOR, 'string'],
+            //
+            [static::ATTR_VIDEO_ORIENTATION, 'string'],
+            //
             [static::ATTR_LANG, 'required'],
             [static::ATTR_LANG, 'in', 'range' => static::$languages],
             //

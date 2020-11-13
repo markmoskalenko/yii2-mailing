@@ -29,12 +29,16 @@ use MongoDB\BSON\ObjectId;
  * @property ObjectId $channel
  * @property ObjectId $templateStoryId
  * @property ObjectId $templateGroupKey
+ * @property string $bgColor
+ * @property integer $videoOrientation
  *
  * @SWG\Definition(
  *     definition="Story",
  *     description="Объект сториса",
  *     type="object",
  *     @SWG\Property(property="id", type="string", description="ID сториса"),
+ *     @SWG\Property(property="videoOrientation", type="string", description="Ориентация видео"),
+ *     @SWG\Property(property="bgColor", type="string", description="Цвет фона сториса"),
  *     @SWG\Property(property="imageUrl", type="string", description="Url на картинку сториса"),
  *     @SWG\Property(property="videoUrl", type="string", description="Url на видео сториса"),
  *     @SWG\Property(property="lottie", type="string", description="JSON анимации"),
@@ -73,6 +77,8 @@ class Story extends ActiveRecord
     const ATTR_CHANNEL = 'channel';
     const ATTR_IS_REQUIRED_WATCH = 'isRequiredWatch';
     const ATTR_API_CALLBACK = 'apiCallback';
+    const ATTR_BG_COLOR = 'bgColor';
+    const ATTR_VIDEO_ORIENTATION = 'videoOrientation';
 
     const BUTTON_STYLE_1 = 'style1';
     const BUTTON_STYLE_2 = 'style2';
@@ -143,6 +149,8 @@ class Story extends ActiveRecord
             static::ATTR_VIDEO_URL,
             static::ATTR_IS_REQUIRED_WATCH,
             static::ATTR_API_CALLBACK,
+            static::ATTR_BG_COLOR,
+            static::ATTR_VIDEO_ORIENTATION,
         ];
     }
 
@@ -167,6 +175,8 @@ class Story extends ActiveRecord
             static::ATTR_TEMPLATE_ID,
             static::ATTR_CHANNEL,
             static::ATTR_VIDEO_URL,
+            static::ATTR_BG_COLOR,
+            static::ATTR_VIDEO_ORIENTATION,
         ];
     }
 
@@ -176,6 +186,9 @@ class Story extends ActiveRecord
     public function rules()
     {
         return [
+            [static::ATTR_BG_COLOR, 'string'],
+            //
+            [static::ATTR_VIDEO_ORIENTATION, 'string'],
             //
             [static::ATTR_TEMPLATE_ID, 'required'],
             [static::ATTR_TEMPLATE_STORY_ID, 'required'],
