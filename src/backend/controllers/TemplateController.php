@@ -23,8 +23,9 @@ class TemplateController extends Controller
      */
     public function actionIndex($group = Template::GROUP_TRIGGER)
     {
+//        , ['group' => $group]
         $searchModel = new TemplateSearch();
-        $dataProvider = $searchModel->search(array_merge(Yii::$app->request->get(), ['group' => $group]));
+        $dataProvider = $searchModel->search(array_merge(Yii::$app->request->get()));
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
