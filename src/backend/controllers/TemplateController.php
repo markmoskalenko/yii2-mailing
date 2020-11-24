@@ -23,7 +23,7 @@ class TemplateController extends Controller
      */
     public function actionIndex($group = Template::GROUP_TRIGGER)
     {
-//        , ['group' => $group]
+        //        , ['group' => $group]
         $searchModel = new TemplateSearch();
         $dataProvider = $searchModel->search(array_merge(Yii::$app->request->get()));
 
@@ -153,17 +153,27 @@ class TemplateController extends Controller
             $mailing->sendStory($user->getId(), $key);
         }
 
-        //        $user = $mailing->userClass::findByEmail('feelsmax@gmail.com');
-        //        $mailing->send($user->getEmail(), $key, []);
-        //        $mailing->sendPush($user->getId(), $key, []);
-        //        $mailing->sendTelegram($user->getId(), $key, []);
-        //        $mailing->sendStory($user->getId(), $key);
-        //
-        //        $user = $mailing->userClass::findByEmail('bpxmsg@gmail.com');
-        //        $mailing->send($user->getEmail(), $key, []);
-        //        $mailing->sendPush($user->getId(), $key, []);
-        //        $mailing->sendTelegram($user->getId(), $key, []);
-        //        $mailing->sendStory($user->getId(), $key);
+        /** @var MailingModule $mailing */
+        $mailing = Yii::$app->getModule('mailing');
+        $user = $mailing->userClass::findByEmail('feelsmax@gmail.com');
+
+        if ($user) {
+            $mailing->send($user->getEmail(), $key, []);
+            $mailing->sendPush($user->getId(), $key, []);
+            $mailing->sendTelegram($user->getId(), $key, []);
+            $mailing->sendStory($user->getId(), $key);
+        }
+
+        /** @var MailingModule $mailing */
+        $mailing = Yii::$app->getModule('mailing');
+        $user = $mailing->userClass::findByEmail('bpxmsg@gmail.com');
+
+        if ($user) {
+            $mailing->send($user->getEmail(), $key, []);
+            $mailing->sendPush($user->getId(), $key, []);
+            $mailing->sendTelegram($user->getId(), $key, []);
+            $mailing->sendStory($user->getId(), $key);
+        }
     }
 
     public function actionCopy($id)
