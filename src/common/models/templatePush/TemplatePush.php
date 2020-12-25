@@ -12,11 +12,12 @@ use rise\mongoObjectBehavior\MongoObjectIdBehavior;
  * Шаблоны Telegram
  *
  * @property ObjectId $_id
- * @property string   $id
+ * @property string $id
  * @property ObjectId $templateId
- * @property string   $lang
- * @property string   $title
- * @property string   $body
+ * @property string $lang
+ * @property string $title
+ * @property string $body
+ * @property string $action
  *
  * @property Template $template
  */
@@ -26,12 +27,13 @@ class TemplatePush extends ActiveRecord
     use TemplatePushFinder;
     use TemplatePushFormatter;
 
-    const ATTR_MONGO_ID    = '_id';
-    const ATTR_ID          = 'id';
+    const ATTR_MONGO_ID = '_id';
+    const ATTR_ID = 'id';
     const ATTR_TEMPLATE_ID = 'templateId';
-    const ATTR_LANG        = 'lang';
-    const ATTR_TITLE       = 'title';
-    const ATTR_BODY        = 'body';
+    const ATTR_LANG = 'lang';
+    const ATTR_TITLE = 'title';
+    const ATTR_BODY = 'body';
+    const ATTR_ACTION = 'action';
 
     /**
      * @return TemplatePushQuery
@@ -60,6 +62,7 @@ class TemplatePush extends ActiveRecord
             static::ATTR_LANG,
             static::ATTR_TITLE,
             static::ATTR_BODY,
+            static::ATTR_ACTION,
         ];
     }
 
@@ -69,11 +72,12 @@ class TemplatePush extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            static::ATTR_MONGO_ID    => 'ID',
+            static::ATTR_MONGO_ID => 'ID',
             static::ATTR_TEMPLATE_ID => 'Шаблон',
-            static::ATTR_LANG        => 'Язык',
-            static::ATTR_TITLE       => 'Заголовок',
-            static::ATTR_BODY        => 'Текст сообщения',
+            static::ATTR_LANG => 'Язык',
+            static::ATTR_TITLE => 'Заголовок',
+            static::ATTR_BODY => 'Текст сообщения',
+            static::ATTR_ACTION => 'Событие при клике',
         ];
     }
 
@@ -93,6 +97,8 @@ class TemplatePush extends ActiveRecord
             [static::ATTR_BODY, 'string'],
             //
             [static::ATTR_TEMPLATE_ID, 'required'],
+            //
+            [static::ATTR_ACTION, 'string'],
         ];
     }
 
@@ -103,7 +109,7 @@ class TemplatePush extends ActiveRecord
     {
         return [
             'mongoObjectIdBehavior' => [
-                'class'     => MongoObjectIdBehavior::class,
+                'class' => MongoObjectIdBehavior::class,
                 'attribute' => [static::ATTR_TEMPLATE_ID]
             ]
         ];

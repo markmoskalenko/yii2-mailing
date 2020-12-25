@@ -2777,5 +2777,6 @@
         "php": ">=5.4.0",
         "ext-mongodb": "*"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
 }

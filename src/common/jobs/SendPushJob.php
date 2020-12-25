@@ -116,6 +116,13 @@ class SendPushJob extends BaseObject implements JobInterface
                 try {
                     $message = CloudMessage::withTarget('token', $fireBaseToken)
                         ->withNotification(Notification::create($templatePush->title, $body));
+
+                    if ($templatePush->action) {
+                        $message->withData([
+                            'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                            'action' => 'payment'
+                        ]);
+                    }
                     (new Factory())
                         ->withServiceAccount($this->firebaseToken)
                         ->createMessaging()

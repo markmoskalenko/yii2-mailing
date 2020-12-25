@@ -18,6 +18,8 @@ use yii\bootstrap4\Html;
             <div class="col-md-6">
                 <?= $form->field($model, TemplatePush::ATTR_LANG)->dropDownList(LanguageHelpers::$languagesName) ?>
                 <?= $form->field($model, TemplatePush::ATTR_TITLE) ?>
+                <?= $form->field($model, TemplatePush::ATTR_ACTION) ?>
+                <span class="hint">payment, note, task, target</span>
             </div>
         </div>
 

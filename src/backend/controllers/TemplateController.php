@@ -23,8 +23,9 @@ class TemplateController extends Controller
      */
     public function actionIndex($group = Template::GROUP_TRIGGER)
     {
+        //        , ['group' => $group]
         $searchModel = new TemplateSearch();
-        $dataProvider = $searchModel->search(array_merge(Yii::$app->request->get(), ['group' => $group]));
+        $dataProvider = $searchModel->search(array_merge(Yii::$app->request->get()));
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
@@ -124,53 +125,34 @@ class TemplateController extends Controller
      */
     public function actionTest($key)
     {
-        /** @var MailingModule $mailing */
-        $mailing = Yii::$app->getModule('mailing');
-        $user = $mailing->userClass::findByEmail('office@it-yes.com');
-        $mailing->send($user->getEmail(), $key, []);
-        $mailing->sendPush($user->getId(), $key, []);
-        $mailing->sendTelegram($user->getId(), $key, []);
-        $mailing->sendStory($user->getId(), $key);
+        $users = [
+            'office@it-yes.com',
+            'feelsmax@gmail.com',
+            'bpxmsg@gmail.com',
+            'asrorov.davron@gmail.com',
+            'krabovm@gmail.com',
+        ];
 
-        /** @var MailingModule $mailing */
-        $mailing = Yii::$app->getModule('mailing');
-        $user = $mailing->userClass::findByEmail('asrorov.davron@gmail.com');
-        if ($user) {
-            $mailing->send($user->getEmail(), $key, []);
-            $mailing->sendPush($user->getId(), $key, []);
-            $mailing->sendTelegram($user->getId(), $key, []);
-            $mailing->sendStory($user->getId(), $key);
-        }
+        foreach ($users as $user) {
+            /** @var MailingModule $mailing */
+            $mailing = Yii::$app->getModule('mailing');
+            $user = $mailing->userClass::findByEmail($user);
+            $complete = [];
+            if ($user) {
+                try {
+                    $mailing->send($user->getEmail(), $key, []);
+                    $mailing->sendPush($user->getId(), $key, []);
+                    $mailing->sendTelegram($user->getId(), $key, []);
+                    $mailing->sendStory($user->getId(), $key);
+                } catch (\Throwable $e) {
 
-        /** @var MailingModule $mailing */
-        $mailing = Yii::$app->getModule('mailing');
-        $user = $mailing->userClass::findByEmail('krabovm@gmail.com');
-        if ($user) {
-            $mailing->send($user->getEmail(), $key, []);
-            $mailing->sendPush($user->getId(), $key, []);
-            $mailing->sendTelegram($user->getId(), $key, []);
-            $mailing->sendStory($user->getId(), $key);
+                }
+                $complete[] = $user->getEmail();
+            }
         }
+        Yii::$app->response = Response::FORMAT_JSON;
 
-        /** @var MailingModule $mailing */
-        $mailing = Yii::$app->getModule('mailing');
-        $user = $mailing->userClass::findByEmail('feelsmax@gmail.com');
-        if ($user) {
-            $mailing->send($user->getEmail(), $key, []);
-            $mailing->sendPush($user->getId(), $key, []);
-            $mailing->sendTelegram($user->getId(), $key, []);
-            $mailing->sendStory($user->getId(), $key);
-        }
-
-        /** @var MailingModule $mailing */
-        $mailing = Yii::$app->getModule('mailing');
-        $user = $mailing->userClass::findByEmail('bpxmsg@gmail.com');
-        if ($user) {
-            $mailing->send($user->getEmail(), $key, []);
-            $mailing->sendPush($user->getId(), $key, []);
-            $mailing->sendTelegram($user->getId(), $key, []);
-            $mailing->sendStory($user->getId(), $key);
-        }
+        return $complete;
     }
 
     public function actionCopy($id)
