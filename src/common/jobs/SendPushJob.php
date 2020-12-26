@@ -120,7 +120,7 @@ class SendPushJob extends BaseObject implements JobInterface
                     if ($templatePush->action) {
                         $message->withData([
                             'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                            'action' => 'payment'
+                            'action' => $templatePush->action
                         ]);
                     }
                     (new Factory())
