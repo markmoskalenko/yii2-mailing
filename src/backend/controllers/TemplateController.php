@@ -203,7 +203,7 @@ class TemplateController extends Controller
                     case 'email':
                         $mailing->send($user->getId(), $key, []);
                         break;
-                    case 'strory':
+                    case 'story':
                         $mailing->sendStory($user->getId(), $key);
                         break;
                     case 'push':
@@ -239,7 +239,7 @@ class TemplateController extends Controller
                     case 'email':
                         $mailing->send($user->getId(), $key, []);
                         break;
-                    case 'strory':
+                    case 'story':
                         $mailing->sendStory($user->getId(), $key);
                         break;
                     case 'push':
