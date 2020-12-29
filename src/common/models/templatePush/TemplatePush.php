@@ -35,6 +35,20 @@ class TemplatePush extends ActiveRecord
     const ATTR_BODY = 'body';
     const ATTR_ACTION = 'action';
 
+    const ACTION_PAYMENT = 'payment';
+    const ACTION_NOTE = 'note';
+    const ACTION_TASK = 'task';
+    const ACTION_STORY = 'story';
+    const ACTION_TARGET = 'target';
+
+    public static $actions = [
+        self::ACTION_PAYMENT => 'Страница оплат',
+        self::ACTION_NOTE => 'Открыть создание новой заметки',
+        self::ACTION_TASK => 'Открыть создание новой задачи',
+        self::ACTION_STORY => 'Открыть сторисы',
+        self::ACTION_TARGET => 'Открыть цели',
+    ];
+
     /**
      * @return TemplatePushQuery
      */

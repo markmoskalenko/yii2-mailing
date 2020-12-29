@@ -100,7 +100,7 @@ class TemplateEmail extends ActiveRecord
             //
             [static::ATTR_TEMPLATE_ID, 'required'],
             //
-            [static::ATTR_AFFILIATE_DOMAIN, 'required'],
+            [static::ATTR_AFFILIATE_DOMAIN, 'default', 'value' => 'logtime.me'],
             [static::ATTR_AFFILIATE_DOMAIN, 'string'],
         ];
     }

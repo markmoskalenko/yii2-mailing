@@ -13,16 +13,18 @@ use yii\bootstrap4\Html;
         <h6 class="m-0">Настройки шаблона</h6>
     </div>
     <div class="card-body">
-        <?php $form = ActiveForm::begin(); ?>
+        <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
         <div class="row">
             <div class="col-md-6">
                 <?= $form->field($model, TemplateTelegram::ATTR_LANG)->dropDownList(TemplateTelegram::$languagesName) ?>
-                <?= $form->field($model,
-                    TemplateTelegram::ATTR_AFFILIATE_DOMAIN)->hint('Домен партнера без http://. Пример: mybase.pro') ?>
                 <?= $form->field($model, TemplateTelegram::ATTR_PICTURE) ?>
             </div>
             <div class="col-md-6">
                 <?= $form->field($model, TemplateTelegram::ATTR_SUBJECT) ?>
+                <?= $form->field($model, TemplateTelegram::ATTR_VIDEO_FILE)->fileInput() ?>
+                <?php if($model->videoUrl):?>
+                  <a href="<?= $model->getVideoCdnUrl() ?>">Открыть видео</a>
+                <?php endif;?>
             </div>
         </div>
 

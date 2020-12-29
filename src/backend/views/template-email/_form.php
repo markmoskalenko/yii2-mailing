@@ -16,7 +16,6 @@ use yii\bootstrap4\Html;
         <div class="row">
             <div class="col-md-6">
                 <?= $form->field($model, TemplateEmail::ATTR_LANG)->dropDownList(TemplateEmail::$languagesName) ?>
-                <?= $form->field($model, TemplateEmail::ATTR_AFFILIATE_DOMAIN)->hint('Домен партнера без http://. Пример: mybase.pro') ?>
             </div>
             <div class="col-md-6">
                 <?= $form->field($model, TemplateEmail::ATTR_SUBJECT) ?>

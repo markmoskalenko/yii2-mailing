@@ -94,19 +94,6 @@ $this->title = 'Письма';
                           'width' => '100px'
                       ],
                       'buttons' => [
-                          'test' => function ($url, $model)
-                          {
-                              $url = Url::to(['/mailing/template/test', 'key' => $model->key]);
-                              $options = array_merge([
-                                  'title' => 'Тестовая отправка',
-                                  'aria-label' => 'Тестовая отправка',
-                                  'data-pjax' => '1',
-                                  'onclick' => "$.get('" . $url . "'); return false;",
-                              ]);
-                              $icon = Html::tag('span', '', ['class' => 'far fa-paper-plane']);
-
-                              return Html::a($icon, '', $options);
-                          },
                           'copy' => function ($url, $model)
                           {
                               $url = ['/mailing/template/copy', 'id' => (string)$model->_id];
@@ -122,7 +109,7 @@ $this->title = 'Письма';
                               return Html::a($icon, $url, $options);
                           },
                       ],
-                      'template' => '{test} {copy} {view} {update} {delete}'
+                      'template' => '{copy} {view} {update} {delete}'
                   ],
               ],
           ]); ?>

@@ -17,6 +17,7 @@ use yii\helpers\Url;
 /* @var ActiveDataProvider $templatePushProvider */
 /* @var ActiveDataProvider $templateTelegramProvider */
 /* @var ActiveDataProvider $templateStoryProvider */
+/* @var string $emails */
 
 $this->title = $model->name;
 $this->params['breadcrumbs'][] = ['label' => 'Письма', 'url' => ['/mailing/template/index']];
@@ -28,6 +29,36 @@ $this->params['breadcrumbs'][] = $this->title;
         <span class="text-uppercase page-subtitle">Информация</span>
         <h3 class="page-title"><?= Html::encode($this->title) ?> [ <?= $model->key ?> ]</h3>
     </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card mb-5 mt-4">
+      <div class="card-header border-bottom">
+        <h6 class="m-0">Тестовая отправка</h6>
+      </div>
+      <div class="card-body pb-3">
+        <div class="row mb-2">
+          <div class="col-md-12">
+            <?= Html::beginForm(Url::to(['/mailing/template/save-test-email', 'id' => (string)$model->_id]), 'post') ?>
+              <div class="form-group">
+              <input type="text" class="form-control" name="mailingTestEmail" value="<?= $emails ?>">
+              </div>
+              <button class="btn btn-success">Сохранить</button>
+            <?= Html::endForm() ?>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <button class="btn btn-primary" type="button" onclick="$.get('<?= Url::to(['/mailing/template/test', 'key'=>$model->key, 'type'=> 'email']) ?>'); return false;">Отправить Email</button>
+            <button class="btn btn-primary" type="button" onclick="$.get('<?= Url::to(['/mailing/template/test', 'key'=>$model->key, 'type'=> 'push']) ?>'); return false;">Отправить Push</button>
+            <button class="btn btn-primary" type="button" onclick="$.get('<?= Url::to(['/mailing/template/test', 'key'=>$model->key, 'type'=> 'telegram']) ?>'); return false;">Отправить Telegram</button>
+            <button class="btn btn-primary" type="button" onclick="$.get('<?= Url::to(['/mailing/template/test', 'key'=>$model->key, 'type'=> 'story']) ?>'); return false;">Отправить Story</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 
@@ -56,7 +87,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'columns' => [
                         TemplateEmail::ATTR_SUBJECT,
                         TemplateEmail::ATTR_LANG,
-                        TemplateEmail::ATTR_AFFILIATE_DOMAIN,
                         [
                             'class' => ActionColumn::class,
                             'controller' => 'template-email',

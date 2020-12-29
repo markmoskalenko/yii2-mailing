@@ -9,10 +9,7 @@ use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\templateTelegram\TemplateTelegram;
 use MongoDB\BSON\ObjectId;
 use TelegramBot\Api\BotApi;
-use TelegramBot\Api\Types\ForceReply;
 use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
-use TelegramBot\Api\Types\Message;
-use TelegramBot\Api\Types\ReplyKeyboardMarkup;
 use yii\base\BaseObject;
 use yii\base\ErrorException;
 use yii\queue\JobInterface;
@@ -100,7 +97,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
 
         $log = EmailSendLog::findOne($this->logId);
 
-        try {
+//        try {
             if (!$log) {
                 // в телеграм
                 throw new ErrorException('Лог не найден');
@@ -121,7 +118,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
             // Поиск основного партнера по реферальному домену
             // @todo переименовать в affiliate
             $referral = $this->user->getReferralByAffiliateDomain()->one();
-
+echo $this->user->getEmail().PHP_EOL;
             $data = LinksHelpers::getLinks(
                 $this->user,
                 $referral,
@@ -152,7 +149,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
             }
 
             $keyboard = [];
-            foreach ($templateTelegram->keyboard as $item) {
+            foreach ((array)$templateTelegram->keyboard as $item) {
                 if (isset($item['url'])) {
                     foreach ($data as $key => $value) {
                         $item['url'] = str_replace($key, $value, $item['url']);
@@ -162,22 +159,25 @@ class SendTelegramJob extends BaseObject implements JobInterface
                 $keyboard[] = $item;
             }
 
-            $isSend = $this->sendTelegramMessage($body, $templateTelegram->picture ?: false, $keyboard);
+            $isSend = $this->sendTelegramMessage($body,
+                $templateTelegram->picture ?: false,
+                $templateTelegram->getVideoCdnUrl() ?: false,
+                $keyboard);
 
             if ($isSend) {
                 $log->send();
             } else {
                 $log->setError('Ошибка отправки');
             }
-        } catch (\Throwable $e) {
-            $message = '';
-            $message .= '<br>' . $e->getMessage();
-            $message .= '<br>' . $e->getTraceAsString();
-            $log->setError($message);
-            $this->user->disableTelegram();
+//        } catch (\Throwable $e) {
+//            $message = '';
+//            $message .= '<br>' . $e->getMessage();
+//            $message .= '<br>' . $e->getTraceAsString();
+//            $log->setError($message);
+//            $this->user->disableTelegram();
 
-            throw new $e;
-        }
+//            throw new $e;
+//        }
     }
 
 
@@ -188,7 +188,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
      * @param array|bool $keyboard
      * @return bool
      */
-    private function sendTelegramMessage($text, $telegramPhoto = false, $keyboard = false)
+    private function sendTelegramMessage($text, $telegramPhoto = false,$telegramVideo = false, $keyboard = false)
     {
         $replyMarkup = null;
         $telegramId = $this->user->getTelegramId();
@@ -197,8 +197,11 @@ class SendTelegramJob extends BaseObject implements JobInterface
             $replyMarkup = new InlineKeyboardMarkup($keyboard);
         }
 
+        echo $telegramVideo.PHP_EOL;
         if ($telegramPhoto) {
             $this->telegramApi->sendPhoto($telegramId, $telegramPhoto, $text, null, $replyMarkup, false, 'html');
+        }elseif ($telegramVideo) {
+            $this->telegramApi->sendVideo($telegramId, $telegramVideo, null, $text, null, $replyMarkup, false, 'html');
         } else {
             $this->telegramApi->sendMessage($telegramId, $text, 'html', false, null, $replyMarkup, false);
         }

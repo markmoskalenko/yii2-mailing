@@ -2,6 +2,7 @@
 
 namespace markmoskalenko\mailing\backend\controllers;
 
+use markmoskalenko\mailing\common\models\mailingTestEmail\MailingTestEmail;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\template\TemplateSearch;
 use markmoskalenko\mailing\MailingModule;
@@ -23,8 +24,8 @@ class TemplateController extends Controller
      */
     public function actionIndex($group = Template::GROUP_TRIGGER)
     {
-        //        , ['group' => $group]
         $searchModel = new TemplateSearch();
+        $searchModel->group = $group;
         $dataProvider = $searchModel->search(array_merge(Yii::$app->request->get()));
 
         return $this->render('index', [
@@ -73,6 +74,8 @@ class TemplateController extends Controller
         $templateStoryProvider = new ActiveDataProvider([
             'query' => $model->getTemplateStory()
         ]);
+        
+        $emails = MailingTestEmail::getAllForView();
 
         return $this->render('view', [
             'model' => $model,
@@ -80,6 +83,7 @@ class TemplateController extends Controller
             'templateTelegramProvider' => $templateTelegramProvider,
             'templatePushProvider' => $templatePushProvider,
             'templateStoryProvider' => $templateStoryProvider,
+            'emails' => $emails,
         ]);
     }
 
@@ -120,39 +124,52 @@ class TemplateController extends Controller
     }
 
     /**
+     * @param $id
+     * @return Response
+     */
+    public function actionSaveTestEmail($id)
+    {
+        $emails = Yii::$app->request->post('mailingTestEmail');
+        $emails = explode(',', $emails);
+        MailingTestEmail::deleteAll();
+        foreach ($emails as $email) {
+            $model = new MailingTestEmail();
+            $model->email = $email;
+            $model->save();
+        }
+
+        return $this->redirect(['/mailing/template/view', 'id' => $id]);
+    }
+    
+    /**
      * @param $key
      * @throws InvalidConfigException
      */
-    public function actionTest($key)
+    public function actionTest($key, $type)
     {
-        $users = [
-            'office@it-yes.com',
-            'feelsmax@gmail.com',
-            'bpxmsg@gmail.com',
-            'asrorov.davron@gmail.com',
-            'krabovm@gmail.com',
-        ];
+        $users = MailingTestEmail::find()->select(['email'])->column();
 
         foreach ($users as $user) {
             /** @var MailingModule $mailing */
             $mailing = Yii::$app->getModule('mailing');
             $user = $mailing->userClass::findByEmail($user);
-            $complete = [];
             if ($user) {
-                try {
-                    $mailing->send($user->getEmail(), $key, []);
-                    $mailing->sendPush($user->getId(), $key, []);
-                    $mailing->sendTelegram($user->getId(), $key, []);
-                    $mailing->sendStory($user->getId(), $key);
-                } catch (\Throwable $e) {
-
+                switch ($type){
+                    case 'email':
+                        $mailing->send($user->getEmail(), $key, []);
+                        break;
+                    case 'strory':
+                        $mailing->sendStory($user->getId(), $key);
+                        break;
+                    case 'push':
+                        $mailing->sendPush($user->getId(), $key, []);
+                        break;
+                    case 'telegram':
+                        $mailing->sendTelegram($user->getId(), $key, []);
+                        break;
                 }
-                $complete[] = $user->getEmail();
             }
         }
-        Yii::$app->response = Response::FORMAT_JSON;
-
-        return $complete;
     }
 
     public function actionCopy($id)

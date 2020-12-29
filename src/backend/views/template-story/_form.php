@@ -19,14 +19,11 @@ use yii\bootstrap4\Html;
     <div class="row">
       <div class="col-md-6">
           <?= $form->field($model, TemplateStory::ATTR_LANG)->dropDownList(TemplateStory::$languagesName) ?>
-          <?= $form->field($model,
-              TemplateStory::ATTR_AFFILIATE_DOMAIN)->hint('Домен партнера без http://. Пример: mybase.pro') ?>
-          <?= $form->field($model, TemplateStory::ATTR_IMAGE)->fileInput() ?>
-          <?= $form->field($model, TemplateStory::ATTR_VIDEO_FILE)->fileInput() ?>
-          <?= $form->field($model, TemplateStory::ATTR_LOTTIE)->textarea(['rows' => 10]) ?>
           <?= $form->field($model, TemplateStory::ATTR_SUBJECT) ?>
           <?= $form->field($model, TemplateStory::ATTR_YOUTUBE_ID) ?>
           <?= $form->field($model, TemplateStory::ATTR_BG_COLOR) ?>
+          <?= $form->field($model, TemplateStory::ATTR_IMAGE)->fileInput() ?>
+          <?= $form->field($model, TemplateStory::ATTR_VIDEO_FILE)->fileInput() ?>
           <?= $form->field($model, TemplateStory::ATTR_VIDEO_ORIENTATION)->dropDownList(TemplateStory::$videoOrientations) ?>
       </div>
       <div class="col-md-6">

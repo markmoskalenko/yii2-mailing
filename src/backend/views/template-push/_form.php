@@ -17,16 +17,12 @@ use yii\bootstrap4\Html;
         <div class="row">
             <div class="col-md-6">
                 <?= $form->field($model, TemplatePush::ATTR_LANG)->dropDownList(LanguageHelpers::$languagesName) ?>
-                <?= $form->field($model, TemplatePush::ATTR_TITLE) ?>
-                <?= $form->field($model, TemplatePush::ATTR_ACTION) ?>
-                <span class="hint">payment, note, task, target</span>
+                <?= $form->field($model, TemplatePush::ATTR_ACTION)->dropDownList(TemplatePush::$actions, ['prompt'=>'Без действия']) ?>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <?= $form->field($model, TemplatePush::ATTR_BODY)->textarea() ?>
-            </div>
+          <div class="col-md-6">
+              <?= $form->field($model, TemplatePush::ATTR_TITLE) ?>
+              <?= $form->field($model, TemplatePush::ATTR_BODY)->textarea() ?>
+          </div>
         </div>
 
         <div class="form-group">
