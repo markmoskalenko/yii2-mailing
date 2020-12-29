@@ -201,7 +201,7 @@ echo $this->user->getEmail().PHP_EOL;
         if ($telegramPhoto) {
             $this->telegramApi->sendPhoto($telegramId, $telegramPhoto, $text, null, $replyMarkup, false, 'html');
         }elseif ($telegramVideo) {
-            $this->telegramApi->sendVideo($telegramId, $telegramVideo, null, $text, null, $replyMarkup, false, 'html');
+            $this->telegramApi->sendVideo($telegramId, $telegramVideo, null, $text, null, $replyMarkup, false, false, 'html');
         } else {
             $this->telegramApi->sendMessage($telegramId, $text, 'html', false, null, $replyMarkup, false);
         }
