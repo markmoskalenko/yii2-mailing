@@ -29,6 +29,7 @@ use MongoDB\BSON\ObjectId;
  * @property ObjectId $channel
  * @property ObjectId $templateStoryId
  * @property ObjectId $templateGroupKey
+ * @property ObjectId $logId
  * @property string $bgColor
  * @property integer $videoOrientation
  *
@@ -79,6 +80,7 @@ class Story extends ActiveRecord
     const ATTR_API_CALLBACK = 'apiCallback';
     const ATTR_BG_COLOR = 'bgColor';
     const ATTR_VIDEO_ORIENTATION = 'videoOrientation';
+    const ATTR_LOG_ID = 'logId';
 
     const BUTTON_STYLE_1 = 'style1';
     const BUTTON_STYLE_2 = 'style2';
@@ -151,6 +153,7 @@ class Story extends ActiveRecord
             static::ATTR_API_CALLBACK,
             static::ATTR_BG_COLOR,
             static::ATTR_VIDEO_ORIENTATION,
+            static::ATTR_LOG_ID,
         ];
     }
 
@@ -230,9 +233,10 @@ class Story extends ActiveRecord
             [static::ATTR_TEMPLATE_GROUP_KEY, 'required'],
             //
             [static::ATTR_LOTTIE, 'safe'],
+            [static::ATTR_LOG_ID, 'safe'],
             //
             [static::ATTR_CHANNEL, 'default', 'value' => self::CHANNEL_GLOBAL],
-            [static::ATTR_CHANNEL, 'in', 'range' => [self::CHANNEL_GLOBAL, self::CHANNEL_STORY]]
+            [static::ATTR_CHANNEL, 'in', 'range' => [self::CHANNEL_GLOBAL, self::CHANNEL_STORY]],
         ];
     }
 }

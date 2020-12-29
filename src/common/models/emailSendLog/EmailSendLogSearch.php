@@ -18,6 +18,7 @@ class EmailSendLogSearch extends EmailSendLog
         return [
             [self::ATTR_EMAIL, 'safe'],
             [self::ATTR_TEMPLATE_KEY, 'safe'],
+            [self::ATTR_TYPE, 'safe'],
         ];
     }
 
@@ -71,6 +72,7 @@ class EmailSendLogSearch extends EmailSendLog
 
         $query->andFilterWhere(['like', self::ATTR_EMAIL, $this->email]);
         $query->andFilterWhere([self::ATTR_TEMPLATE_KEY => $this->templateKey]);
+        $query->andFilterWhere([self::ATTR_TYPE => $this->type]);
 
         return $dataProvider;
     }

@@ -32,7 +32,7 @@ Modal::end();;
         <div class="card-header border-bottom">
           <h6 class="m-0">Список</h6>
         </div>
-        <div class="card-body p-0 pb-3">
+        <div class="card-body p-0 pb-3 table-full-width">
             <?= GridView::widget([
                 'layout' => "{items}\n{pager}",
                 'dataProvider' => $dataProvider,
@@ -44,11 +44,18 @@ Modal::end();;
                 ],
                 'columns' => [
                     [
+                        'attribute' => EmailSendLog::ATTR_THEME,
+                    ],
+                    [
                         'attribute' => EmailSendLog::ATTR_EMAIL,
+                    ],
+                    [
+                        'attribute' => EmailSendLog::ATTR_TYPE,
                         'format' => 'raw',
+                        'filter' => EmailSendLog::$types,
                         'value' => function (EmailSendLog $item)
                         {
-                            return ($item->user ? $item->user->getEmail() : ''). '<br>' . $item->email;
+                            return EmailSendLog::$types[$item->type];
                         }
                     ],
                     [

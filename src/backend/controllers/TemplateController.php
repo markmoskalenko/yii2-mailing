@@ -156,7 +156,7 @@ class TemplateController extends Controller
             if ($user) {
                 switch ($type){
                     case 'email':
-                        $mailing->send($user->getEmail(), $key, []);
+                        $mailing->send($user->getId(), $key, []);
                         break;
                     case 'strory':
                         $mailing->sendStory($user->getId(), $key);

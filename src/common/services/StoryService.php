@@ -19,7 +19,7 @@ class StoryService
      * @return Story
      * @throws ErrorException
      */
-    public function sendStroy(TemplateStory $templateStory, $userId, $channel = Story::CHANNEL_GLOBAL)
+    public function sendStroy(TemplateStory $templateStory, $userId, $channel = Story::CHANNEL_GLOBAL, $logId)
     {
         $story = new Story();
         $story->imageUrl = $templateStory->getImageUrl();
@@ -40,6 +40,7 @@ class StoryService
         $story->channel = $channel;
         $story->isRequiredWatch = $templateStory->isRequiredWatch;
         $story->apiCallback = $templateStory->apiCallback;
+        $story->logId = $logId;
 
         if (!$story->save()) {
             throw new ErrorException('Ошибка создания сториса для пользователя: ' . var_export($story->getErrors(), true));

@@ -14,6 +14,7 @@ use markmoskalenko\mailing\common\models\story\Story;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\templateStory\TemplateStory;
 use markmoskalenko\mailing\common\services\StoryService;
+use MongoDB\BSON\ObjectId;
 use Yii;
 use yii\base\BootstrapInterface;
 use yii\base\ErrorException;
@@ -109,17 +110,13 @@ class MailingModule extends Module implements BootstrapInterface
      * @param int $delay задержка отправки
      * @throws InvalidConfigException
      */
-    public function send($email, $key, $data = [], $delay = 0, $priority = 3)
+    public function send($userId, $key, $data = [], $delay = 0, $priority = 3)
     {
-        /**
-         * Пользователь
-         */
-        $user = $this->userClass::findByEmail($email);
+        /** @var UserInterface $user пользователь */
+        $user = $this->userClass::findOneById($userId);
 
-        /**
-         * Лог отправки письма
-         */
-        $logId = EmailSendLog::start($email, $key, $user);
+        /** @var ObjectId $logId */
+        $logId = EmailSendLog::start($user, $key, EmailSendLog::TYPE_EMAIL);
 
         /** @var yii\queue\redis\Queue $queue */
         $queue = Yii::$app->get('queue');
@@ -131,7 +128,7 @@ class MailingModule extends Module implements BootstrapInterface
                 // Ключ шаблона
                 'key' => $key,
                 // Email пользователя
-                'email' => $email,
+                'email' => $user->getEmail(),
                 // Данные для шаблона
                 'data' => $data,
                 // ID лога
@@ -168,8 +165,8 @@ class MailingModule extends Module implements BootstrapInterface
         /** @var UserInterface $user пользователь */
         $user = $this->userClass::findOneById($userId);
 
-        /** @var EmailSendLog $logId логер отправки */
-        $logId = EmailSendLog::start($userId, $key, $user);
+        /** @var ObjectId $logId */
+        $logId = EmailSendLog::start($user, $key, EmailSendLog::TYPE_PUSH);
 
         /** @var yii\queue\redis\Queue $queue */
         $queue = Yii::$app->get('queue');
@@ -205,8 +202,8 @@ class MailingModule extends Module implements BootstrapInterface
         /** @var UserInterface $user пользователь */
         $user = $this->userClass::findOneById($userId);
 
-        /** @var EmailSendLog $logId логер отправки */
-        $logId = EmailSendLog::start($userId, $key, $user);
+        /** @var ObjectId $logId */
+        $logId = EmailSendLog::start($user, $key, EmailSendLog::TYPE_TELEGRAM);
 
         /** @var yii\queue\redis\Queue $queue */
         $queue = Yii::$app->get('queue');
@@ -234,8 +231,10 @@ class MailingModule extends Module implements BootstrapInterface
     public function sendStory($userId, $key, $isDispatch = true, $channel = Story::CHANNEL_GLOBAL)
     {
         $user = $this->userClass::findOneById($userId);
-        $log = EmailSendLog::start($userId, $key, $user, true);
         $template = Template::findByKey($key);
+
+        /** @var ObjectId $logId */
+        $logId = EmailSendLog::start($user, $key, EmailSendLog::TYPE_STORY);
 
         if (!$log) {
             // в телеграм
@@ -278,7 +277,7 @@ class MailingModule extends Module implements BootstrapInterface
         $newStoriesId = [];
         foreach ($templateStory as $story) {
             $storyService = new StoryService();
-            $newStoriesId[] = $storyService->sendStroy($story, $userId, $channel)->_id;
+            $newStoriesId[] = $storyService->sendStroy($story, $userId, $channel, $logId)->_id;
         }
 
         if ($isDispatch) {

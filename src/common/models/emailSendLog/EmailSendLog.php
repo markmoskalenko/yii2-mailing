@@ -24,6 +24,7 @@ use mongosoft\mongodb\MongoDateBehavior;
  * @property string $openIp
  * @property string $templateKey
  * @property string $logStep
+ * @property string $type
  *
  * @property UserInterface $user
  *
@@ -50,6 +51,19 @@ class EmailSendLog extends ActiveRecord
     const ATTR_OPEN_IP = 'openIp';
     const ATTR_TEMPLATE_KEY = 'templateKey';
     const ATTR_LOG_STEP = 'logStep';
+    const ATTR_TYPE = 'type';
+
+    const TYPE_STORY = 'strory';
+    const TYPE_EMAIL = 'email';
+    const TYPE_TELEGRAM = 'telegram';
+    const TYPE_PUSH = 'push';
+
+    public static $types = [
+        self::TYPE_STORY =>'Сторис',
+        self::TYPE_EMAIL =>'Email',
+        self::TYPE_TELEGRAM =>'Телеграм',
+        self::TYPE_PUSH =>'Пуш',
+    ];
 
     /**
      * @return EmailSendLogQuery
@@ -85,6 +99,7 @@ class EmailSendLog extends ActiveRecord
             static::ATTR_TEMPLATE_KEY,
             static::ATTR_LOG_STEP,
             static::ATTR_THEME,
+            static::ATTR_TYPE,
         ];
     }
 
@@ -106,6 +121,7 @@ class EmailSendLog extends ActiveRecord
             static::ATTR_TEMPLATE_KEY => 'Ключ шаблона',
             static::ATTR_LOG_STEP => 'Шаг',
             static::ATTR_THEME => 'Тема',
+            static::ATTR_TYPE => 'Тип',
         ];
     }
 
@@ -116,16 +132,6 @@ class EmailSendLog extends ActiveRecord
     {
         return [
 
-        ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function fields()
-    {
-        return [
-            static::ATTR_ID => static::ATTR_MONGO_ID,
         ];
     }
 
@@ -156,12 +162,13 @@ class EmailSendLog extends ActiveRecord
      * @param UserInterface $user
      * @return bool
      */
-    public static function start($email, $templateKey, $user, $isReturnLogModel = false)
+    public static function start($user, $templateKey, $type, $isReturnLogModel = false)
     {
         $model = new self();
-        $model->email = $email;
+        $model->email = $user->getEmail();
         $model->templateKey = $templateKey;
         $model->logStep = static::LOG_STEP_START;
+        $model->type = $type;
 
         $template = Template::findByKey($templateKey);
 

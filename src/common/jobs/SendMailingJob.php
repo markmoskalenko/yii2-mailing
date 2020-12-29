@@ -8,7 +8,6 @@ use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\templateEmail\TemplateEmail;
 use MongoDB\BSON\ObjectId;
-use Throwable;
 use Yii;
 use yii\base\BaseObject;
 use yii\base\ErrorException;
@@ -115,7 +114,7 @@ class SendMailingJob extends BaseObject implements JobInterface
         // Отправитель
         $sender = [$this->senderEmail => $this->senderName];
 
-        try {
+//        try {
             if (!$log) {
                 throw new ErrorException('Лог не найден');
             }
@@ -201,26 +200,24 @@ class SendMailingJob extends BaseObject implements JobInterface
                 $body = str_replace($key, $value, $body);
             }
 
-            if (YII_ENV_PROD) {
-                $isSend = $mailer
-                    ->compose('layouts/' . $this->layout, ['content' => $body])
-                    ->setSubject($templateEmail->subject)
-                    ->setFrom($sender)
-                    ->setTo($this->email)
-                    ->send();
+            $isSend = $mailer
+                ->compose('layouts/' . $this->layout, ['content' => $body])
+                ->setSubject($templateEmail->subject)
+                ->setFrom($sender)
+                ->setTo($this->email)
+                ->send();
 
-                if ($isSend) {
-                    $log->send();
-                } else {
-                    $log->setError('Ошибка отправки');
-                }
+            if ($isSend) {
+                $log->send();
+            } else {
+                $log->setError('Ошибка отправки');
             }
-        } catch (Throwable $e) {
-            $message = '[Отправитель]: ' . print_r($sender, true);
-            $message .= '<br>' . $e->getMessage();
-            $message .= '<br>' . $e->getTraceAsString();
-            $log->setError($message);
-            throw new $e;
-        }
+//        } catch (Throwable $e) {
+//            $message = '[Отправитель]: ' . print_r($sender, true);
+//            $message .= '<br>' . $e->getMessage();
+//            $message .= '<br>' . $e->getTraceAsString();
+//            $log->setError($message);
+//            throw new $e;
+//        }
     }
 }
