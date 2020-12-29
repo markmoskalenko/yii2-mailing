@@ -172,11 +172,10 @@ class TemplateController extends Controller
         /** @var Connection $redis */
         $redis = Yii::$app->get('redis');
         $offset = (int)$redis->get('mailingOffset');
-        $limit = 1;
+        $limit = 7000;
         /** @var UserQuery $users */
-        $users = User::find()
-            ->orderBy(['_id' => SORT_ASC])
-            ->andWhere(['email'=>['office@it-yes.com', 'mark.moskalenko@gmail.com']]);
+        $users = User::find()->orderBy(['_id' => SORT_ASC]);
+//            ->andWhere(['email'=>['office@it-yes.com', 'mark.moskalenko@gmail.com']]);
 
         switch ($type) {
             case 'email':
