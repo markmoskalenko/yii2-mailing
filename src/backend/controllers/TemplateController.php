@@ -182,7 +182,7 @@ class TemplateController extends Controller
             case 'email':
                 $users
                     ->offset($offset)
-                    ->limit($limit);
+                    ->limit($limit)
                     ->andWhere(['isUnsubscribe' => false]);
                 break;
             case 'push':
