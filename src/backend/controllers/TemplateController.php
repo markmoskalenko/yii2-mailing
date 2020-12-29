@@ -2,6 +2,8 @@
 
 namespace markmoskalenko\mailing\backend\controllers;
 
+use common\models\user\User;
+use common\models\user\UserQuery;
 use markmoskalenko\mailing\common\models\mailingTestEmail\MailingTestEmail;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\template\TemplateSearch;
@@ -10,6 +12,7 @@ use Yii;
 use yii\base\InvalidConfigException;
 use yii\data\ActiveDataProvider;
 use yii\db\StaleObjectException;
+use yii\redis\Connection;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -77,6 +80,10 @@ class TemplateController extends Controller
         
         $emails = MailingTestEmail::getAllForView();
 
+        /** @var Connection $redis */
+        $redis = Yii::$app->get('redis');
+        $mailingOffset = (int)$redis->get('mailingOffset');
+
         return $this->render('view', [
             'model' => $model,
             'templateEmailProvider' => $templateEmailProvider,
@@ -84,6 +91,7 @@ class TemplateController extends Controller
             'templatePushProvider' => $templatePushProvider,
             'templateStoryProvider' => $templateStoryProvider,
             'emails' => $emails,
+            'mailingOffset' => $mailingOffset
         ]);
     }
 
@@ -140,7 +148,76 @@ class TemplateController extends Controller
 
         return $this->redirect(['/mailing/template/view', 'id' => $id]);
     }
-    
+
+    /**
+     * @param $id
+     * @return Response
+     */
+    public function actionSaveOffset($id)
+    {
+        /** @var Connection $redis */
+        $redis = Yii::$app->get('redis');
+        $mailingOffset = Yii::$app->request->post('mailingOffset', 0);
+        $redis->set('mailingOffset', (int)$mailingOffset);
+
+        return $this->redirect(['/mailing/template/view', 'id' => $id]);
+    }
+
+    /**
+     * @param $key
+     * @throws InvalidConfigException
+     */
+    public function actionSend($key, $type)
+    {
+        /** @var Connection $redis */
+        $redis = Yii::$app->get('redis');
+        $offset = (int)$redis->get('mailingOffset');
+        $limit = 7000;
+        /** @var UserQuery $users */
+        $users = User::find()
+            ->offset($offset)
+            ->limit(7000)
+            ->orderBy(['_id' => SORT_DESC]);
+
+        switch ($type) {
+            case 'email':
+                $users->andWhere(['isUnsubscribe' => false]);
+                break;
+            case 'push':
+                $users->andWhere(['firebasePushToken' => [ '$exists'=> true, '$not' => ['$size'=> 0]]]);
+                break;
+            case 'telegram':
+                $users
+                    ->andWhere(['!=', 'telegramId', null])
+                    ->andWhere(['telegramIsActive' => true]);
+                break;
+        }
+
+        foreach ($users as $user) {
+            /** @var MailingModule $mailing */
+            $mailing = Yii::$app->getModule('mailing');
+            if ($user) {
+                switch ($type){
+                    case 'email':
+                        $mailing->send($user->getId(), $key, []);
+                        break;
+                    case 'strory':
+                        $mailing->sendStory($user->getId(), $key);
+                        break;
+                    case 'push':
+                        $mailing->sendPush($user->getId(), $key, []);
+                        break;
+                    case 'telegram':
+                        $mailing->sendTelegram($user->getId(), $key, []);
+                        break;
+                }
+            }
+        }
+
+        $offset += $limit;
+        $redis->set('mailingOffset', $offset);
+    }
+
     /**
      * @param $key
      * @throws InvalidConfigException
