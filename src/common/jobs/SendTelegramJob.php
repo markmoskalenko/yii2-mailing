@@ -97,7 +97,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
 
         $log = EmailSendLog::findOne($this->logId);
 
-//        try {
+        try {
             if (!$log) {
                 // в телеграм
                 throw new ErrorException('Лог не найден');
@@ -118,7 +118,7 @@ class SendTelegramJob extends BaseObject implements JobInterface
             // Поиск основного партнера по реферальному домену
             // @todo переименовать в affiliate
             $referral = $this->user->getReferralByAffiliateDomain()->one();
-echo $this->user->getEmail().PHP_EOL;
+
             $data = LinksHelpers::getLinks(
                 $this->user,
                 $referral,
@@ -169,15 +169,15 @@ echo $this->user->getEmail().PHP_EOL;
             } else {
                 $log->setError('Ошибка отправки');
             }
-//        } catch (\Throwable $e) {
-//            $message = '';
-//            $message .= '<br>' . $e->getMessage();
-//            $message .= '<br>' . $e->getTraceAsString();
-//            $log->setError($message);
-//            $this->user->disableTelegram();
+        } catch (\Throwable $e) {
+            $message = '';
+            $message .= '<br>' . $e->getMessage();
+            $message .= '<br>' . $e->getTraceAsString();
+            $log->setError($message);
+            $this->user->disableTelegram();
 
-//            throw new $e;
-//        }
+            throw new $e;
+        }
     }
 
 
@@ -197,7 +197,6 @@ echo $this->user->getEmail().PHP_EOL;
             $replyMarkup = new InlineKeyboardMarkup($keyboard);
         }
 
-        echo $telegramVideo.PHP_EOL;
         if ($telegramPhoto) {
             $this->telegramApi->sendPhoto($telegramId, $telegramPhoto, $text, null, $replyMarkup, false, 'html');
         }elseif ($telegramVideo) {
