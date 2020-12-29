@@ -7,7 +7,6 @@ use markmoskalenko\mailing\common\interfaces\BroadcastServiceInterface;
 use markmoskalenko\mailing\common\interfaces\UserInterface;
 use markmoskalenko\mailing\common\jobs\SendMailingJob;
 use markmoskalenko\mailing\common\jobs\SendPushJob;
-use markmoskalenko\mailing\common\jobs\SendStoryJob;
 use markmoskalenko\mailing\common\jobs\SendTelegramJob;
 use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
 use markmoskalenko\mailing\common\models\story\Story;
@@ -233,13 +232,7 @@ class MailingModule extends Module implements BootstrapInterface
         $user = $this->userClass::findOneById($userId);
         $template = Template::findByKey($key);
 
-        /** @var ObjectId $logId */
-        $logId = EmailSendLog::start($user, $key, EmailSendLog::TYPE_STORY);
-
-        if (!$log) {
-            // в телеграм
-            throw new ErrorException('Лог не найден');
-        }
+        $log = EmailSendLog::start($user, $key, EmailSendLog::TYPE_STORY, true);
 
         if (!$template) {
             throw new ErrorException('Шаблон не найден ' . $key);
@@ -277,7 +270,7 @@ class MailingModule extends Module implements BootstrapInterface
         $newStoriesId = [];
         foreach ($templateStory as $story) {
             $storyService = new StoryService();
-            $newStoriesId[] = $storyService->sendStroy($story, $userId, $channel, $logId)->_id;
+            $newStoriesId[] = $storyService->sendStroy($story, $userId, $channel, $log->_id)->_id;
         }
 
         if ($isDispatch) {
@@ -292,6 +285,8 @@ class MailingModule extends Module implements BootstrapInterface
             $dispatchService = new $this->broadcastService;
             $dispatchService->dispatch('[Story] Update', ['stories' => $stories], true, (string)$userId);
         }
+
+        $log->send();
 
         return $newStoriesId;
     }
