@@ -172,16 +172,18 @@ class TemplateController extends Controller
         /** @var Connection $redis */
         $redis = Yii::$app->get('redis');
         $offset = (int)$redis->get('mailingOffset');
-        $limit = 7000;
+        $limit = 1;
         /** @var UserQuery $users */
         $users = User::find()
-            ->offset($offset)
-            ->limit(7000)
-            ->orderBy(['_id' => SORT_DESC]);
+            ->orderBy(['_id' => SORT_ASC])
+            ->andWhere(['email'=>['office@it-yes.com', 'mark.moskalenko@gmail.com']]);
 
         switch ($type) {
             case 'email':
-                $users->andWhere(['isUnsubscribe' => false]);
+                $users
+                    ->offset($offset)
+                    ->limit($limit);
+                    ->andWhere(['isUnsubscribe' => false]);
                 break;
             case 'push':
                 $users->andWhere(['firebasePushToken' => [ '$exists'=> true, '$not' => ['$size'=> 0]]]);
@@ -193,7 +195,8 @@ class TemplateController extends Controller
                 break;
         }
 
-        foreach ($users as $user) {
+        foreach ($users->each() as $user) {
+            echo $user->email;
             /** @var MailingModule $mailing */
             $mailing = Yii::$app->getModule('mailing');
             if ($user) {
@@ -214,8 +217,10 @@ class TemplateController extends Controller
             }
         }
 
-        $offset += $limit;
-        $redis->set('mailingOffset', $offset);
+        if($type === 'email'){
+            $offset += $limit;
+            $redis->set('mailingOffset', $offset);
+        }
     }
 
     /**
