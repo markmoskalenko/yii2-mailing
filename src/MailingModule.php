@@ -7,6 +7,7 @@ use markmoskalenko\mailing\common\interfaces\BroadcastServiceInterface;
 use markmoskalenko\mailing\common\interfaces\UserInterface;
 use markmoskalenko\mailing\common\jobs\SendMailingJob;
 use markmoskalenko\mailing\common\jobs\SendPushJob;
+use markmoskalenko\mailing\common\jobs\SendStoryJob;
 use markmoskalenko\mailing\common\jobs\SendTelegramJob;
 use markmoskalenko\mailing\common\models\emailSendLog\EmailSendLog;
 use markmoskalenko\mailing\common\models\story\Story;
@@ -223,71 +224,78 @@ class MailingModule extends Module implements BootstrapInterface
     }
 
     /**
-     * @param        $userId
+     * @param UserInterface $user
      * @param string $key
      * @throws InvalidConfigException
      */
-    public function sendStory($userId, $key, $isDispatch = true, $channel = Story::CHANNEL_GLOBAL)
+    public function sendStory($user, $key, $isDispatch = true, $channel = Story::CHANNEL_GLOBAL, $priority = 3, $isQueue = false)
     {
-        $user = $this->userClass::findOneById($userId);
-        $template = Template::findByKey($key);
-
         $log = EmailSendLog::start($user, $key, EmailSendLog::TYPE_STORY, true);
 
-        if (!$template) {
-            throw new ErrorException('Шаблон не найден ' . $key);
+        if($isQueue){
+            /** @var yii\queue\redis\Queue $queue */
+            $queue = Yii::$app->get('queue');
+            $queue
+                ->priority($priority)
+                ->push(new SendStoryJob([
+                    'key' => $key,
+                    'logId' => $log->_id,
+                    'ourDomain' => $this->ourDomain,
+                    'links' => $this->links,
+                    'ssl' => $this->ssl,
+                    'userClass' => $this->userClass,
+                    'broadcastServiceClass' => $this->broadcastService,
+                    'userId' => $user->_id,
+                ]));
+        }else{
+            $template = Template::findByKey($key);
+            // Поиск основного партнера по реферальному домену
+            // @todo переименовать в affiliate
+            $referral = $user->getReferralByAffiliateDomain()->one();
+
+            $data = LinksHelpers::getLinks(
+                $user,
+                $referral,
+                $this->ssl,
+                $this->links,
+                $this->ourDomain,
+                (string)$log->_id
+            );
+
+            // Шаблон письма для отправки
+            // Ищет по ключу, языку и домену партнера
+            $templateStory = TemplateStory::findAllByKeyAndLangAndAffiliateDomain(
+                $template->_id,
+                $user->getLanguage(),
+                $data['{sourceDomain}']
+            );
+
+            if (!$templateStory) {
+                throw new ErrorException('Шаблон не найден :' . $user->getLanguage() . ':' . $key . ':' . $data['{sourceDomain}']);
+            }
+
+            $newStoriesId = [];
+            foreach ($templateStory as $story) {
+                $storyService = new StoryService();
+                $newStoriesId[] = $storyService->sendStroy($story, $user->_id, $channel, $log->_id)->_id;
+            }
+
+            if ($isDispatch) {
+                $stories = Story::find()
+                    ->owner($user->_id)
+                    ->active()
+                    ->globalChannel()
+                    ->orderBy(['_id' => SORT_ASC])
+                    ->all();
+
+                $stories = ArrayHelper::toArray($stories);
+                $dispatchService = new $this->broadcastService;
+                $dispatchService->dispatch('[Story] Update', ['stories' => $stories], true, (string)$user->_id);
+            }
+
+            $log->send();
+
+            return $newStoriesId;
         }
-
-        if (!$user) {
-            throw new ErrorException('Пользователь не найден ' . $userId);
-        }
-
-        // Поиск основного партнера по реферальному домену
-        // @todo переименовать в affiliate
-        $referral = $user->getReferralByAffiliateDomain()->one();
-
-        $data = LinksHelpers::getLinks(
-            $user,
-            $referral,
-            $this->ssl,
-            $this->links,
-            $this->ourDomain,
-            (string)$log->_id
-        );
-
-        // Шаблон письма для отправки
-        // Ищет по ключу, языку и домену партнера
-        $templateStory = TemplateStory::findAllByKeyAndLangAndAffiliateDomain(
-            $template->_id,
-            $user->getLanguage(),
-            $data['{sourceDomain}']
-        );
-
-        if (!$templateStory) {
-            throw new ErrorException('Шаблон не найден :' . $user->getLanguage() . ':' . $key . ':' . $data['{sourceDomain}']);
-        }
-
-        $newStoriesId = [];
-        foreach ($templateStory as $story) {
-            $storyService = new StoryService();
-            $newStoriesId[] = $storyService->sendStroy($story, $userId, $channel, $log->_id)->_id;
-        }
-
-        if ($isDispatch) {
-            $stories = Story::find()
-                ->owner($userId)
-                ->active()
-                ->globalChannel()
-                ->orderBy(['_id' => SORT_ASC])
-                ->all();
-            
-            $stories = ArrayHelper::toArray($stories);
-            $dispatchService = new $this->broadcastService;
-            $dispatchService->dispatch('[Story] Update', ['stories' => $stories], true, (string)$userId);
-        }
-
-        $log->send();
-
-        return $newStoriesId;
     }
 }

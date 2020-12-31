@@ -5,6 +5,7 @@ namespace markmoskalenko\mailing\backend\controllers;
 use common\models\user\User;
 use common\models\user\UserQuery;
 use markmoskalenko\mailing\common\models\mailingTestEmail\MailingTestEmail;
+use markmoskalenko\mailing\common\models\story\Story;
 use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\template\TemplateSearch;
 use markmoskalenko\mailing\MailingModule;
@@ -172,54 +173,47 @@ class TemplateController extends Controller
         /** @var Connection $redis */
         $redis = Yii::$app->get('redis');
         $offset = (int)$redis->get('mailingOffset');
-        $limit = 7000;
+        $limit = 5;
         /** @var UserQuery $users */
-        $users = User::find()->orderBy(['_id' => SORT_ASC]);
-//            ->andWhere(['email'=>['office@it-yes.com', 'mark.moskalenko@gmail.com']]);
+        $users = User::find()
+            ->offset($offset)
+            ->limit($limit)
+            ->orderBy(['_id' => SORT_ASC]);
 
         switch ($type) {
             case 'email':
                 $users
-                    ->offset($offset)
-                    ->limit($limit)
                     ->andWhere(['isUnsubscribe' => false]);
                 break;
             case 'push':
                 $users->andWhere(['firebasePushToken' => [ '$exists'=> true, '$not' => ['$size'=> 0]]]);
                 break;
             case 'telegram':
-                $users
-                    ->andWhere(['!=', 'telegramId', null])
-                    ->andWhere(['telegramIsActive' => true]);
+                $users->andWhere(['!=', 'telegramId', null]);
                 break;
         }
 
         foreach ($users->each() as $user) {
-            echo $user->email;
             /** @var MailingModule $mailing */
             $mailing = Yii::$app->getModule('mailing');
-            if ($user) {
-                switch ($type){
-                    case 'email':
-                        $mailing->send($user->getId(), $key, []);
-                        break;
-                    case 'story':
-                        $mailing->sendStory($user->getId(), $key);
-                        break;
-                    case 'push':
-                        $mailing->sendPush($user->getId(), $key, []);
-                        break;
-                    case 'telegram':
-                        $mailing->sendTelegram($user->getId(), $key, []);
-                        break;
-                }
+            switch ($type){
+                case 'email':
+                    $mailing->send($user->getId(), $key, []);
+                    break;
+                case 'story':
+                    $mailing->sendStory($user, $key, true,Story::CHANNEL_GLOBAL, 3,false);
+                    break;
+                case 'push':
+                    $mailing->sendPush($user->getId(), $key, []);
+                    break;
+                case 'telegram':
+                    $mailing->sendTelegram($user->getId(), $key, []);
+                    break;
             }
         }
 
-        if($type === 'email'){
-            $offset += $limit;
-            $redis->set('mailingOffset', $offset);
-        }
+        $offset += $limit;
+        $redis->set('mailingOffset', $offset);
     }
 
     /**
@@ -234,21 +228,22 @@ class TemplateController extends Controller
             /** @var MailingModule $mailing */
             $mailing = Yii::$app->getModule('mailing');
             $user = $mailing->userClass::findByEmail($user);
-            if ($user) {
-                switch ($type){
-                    case 'email':
-                        $mailing->send($user->getId(), $key, []);
-                        break;
-                    case 'story':
-                        $mailing->sendStory($user->getId(), $key);
-                        break;
-                    case 'push':
-                        $mailing->sendPush($user->getId(), $key, []);
-                        break;
-                    case 'telegram':
-                        $mailing->sendTelegram($user->getId(), $key, []);
-                        break;
-                }
+            if(!$user){
+                continue;
+            }
+            switch ($type){
+                case 'email':
+                    $mailing->send($user->getId(), $key, []);
+                    break;
+                case 'story':
+                    $mailing->sendStory($user, $key, true,Story::CHANNEL_GLOBAL, 3,true);
+                    break;
+                case 'push':
+                    $mailing->sendPush($user->getId(), $key, []);
+                    break;
+                case 'telegram':
+                    $mailing->sendTelegram($user->getId(), $key, []);
+                    break;
             }
         }
     }

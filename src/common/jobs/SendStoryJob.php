@@ -11,7 +11,6 @@ use markmoskalenko\mailing\common\models\template\Template;
 use markmoskalenko\mailing\common\models\templateStory\TemplateStory;
 use markmoskalenko\mailing\common\services\StoryService;
 use MongoDB\BSON\ObjectId;
-use Throwable;
 use yii\base\BaseObject;
 use yii\base\ErrorException;
 use yii\helpers\ArrayHelper;
@@ -72,7 +71,7 @@ class SendStoryJob extends BaseObject implements JobInterface
      * Данные для темплейта
      * @var array
      */
-    public $data;
+    public $data = [];
 
     /**
      * @var
@@ -92,7 +91,6 @@ class SendStoryJob extends BaseObject implements JobInterface
         $template = Template::findByKey($this->key);
 
         $log = EmailSendLog::findOne($this->logId);
-
         //        try {
         if (!$log) {
             // в телеграм
@@ -118,8 +116,9 @@ class SendStoryJob extends BaseObject implements JobInterface
             $this->links,
             $this->ourDomain,
             $this->logId,
-            $this->data
+           []
         );
+
 
         // Шаблон письма для отправки
         // Ищет по ключу, языку и домену партнера
@@ -136,6 +135,16 @@ class SendStoryJob extends BaseObject implements JobInterface
         foreach ($templateStory as $story) {
             $this->sendStory($story, $this->userId);
         }
+
+        $stories = Story::find()
+            ->owner($this->userId)
+            ->active()
+            ->globalChannel()
+            ->orderBy(['_id' => SORT_ASC])
+            ->all();
+
+        $stories = ArrayHelper::toArray($stories);
+        $broadcastService->dispatch('[Story] Update', ['stories' => $stories], true, (string)$this->userId);
     }
 
     /**
@@ -147,6 +156,6 @@ class SendStoryJob extends BaseObject implements JobInterface
     {
         $storyService = new StoryService();
 
-        return $storyService->sendStroy($templateStory, $userId);
+        return $storyService->sendStroy($templateStory, $userId, Story::CHANNEL_GLOBAL, $this->logId);
     }
 }

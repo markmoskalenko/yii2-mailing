@@ -18,4 +18,16 @@ trait TemplateFinder
 
         return $query->byKey($key)->one();
     }
+
+    /**
+     * @param $key
+     * @return false|string|null
+     */
+    public static function getNameByKey($key)
+    {
+        /** @var TemplateQuery $query */
+        $query = static::find();
+
+        return $query->byKey($key)->select(['name'])->scalar();
+    }
 }
